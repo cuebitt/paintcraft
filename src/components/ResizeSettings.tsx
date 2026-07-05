@@ -17,7 +17,7 @@ const RESIZE_FILTERS: { value: ResizeFilter; label: string }[] = [
   { value: "hamming", label: "Hamming" },
   { value: "lanczos2", label: "Lanczos 2" },
   { value: "lanczos3", label: "Lanczos 3" },
-  { value: "mks2013", label: "Magic Kernel Sharp 2013" },
+  { value: "mks2013", label: "MKS 2013" },
   { value: "nearest", label: "Nearest Neighbor" },
 ];
 
@@ -81,13 +81,22 @@ export function ResizeSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
-          <WandIcon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Sharpen</span>
-        </span>
-        <div className="flex items-center gap-2">
+        <Tooltip disabled={!showTooltips}>
+          <TooltipTrigger
+            render={
+              <span className="flex items-center gap-2">
+                <WandIcon className="size-4 shrink-0 text-accent" />
+                <span className="text-sm font-medium text-foreground">Sharpen</span>
+              </span>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={8}>
+            Sharpen Strength
+          </TooltipContent>
+        </Tooltip>
+        <div className="flex min-w-[140px] flex-1 items-center gap-2">
           <Slider
-            min={10}
+            min={0}
             max={300}
             step={10}
             value={[resizeSharpenLocal]}
@@ -96,7 +105,6 @@ export function ResizeSettings({
               handleSharpenChange(val ?? 0);
             }}
             disabled={loading || resizeFilter === "nearest"}
-            className="w-24"
           />
           <span className="w-8 text-right text-xs text-muted-foreground">{resizeSharpenLocal}</span>
         </div>

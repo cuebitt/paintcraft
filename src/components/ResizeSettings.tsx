@@ -94,7 +94,7 @@ export function ResizeSettings({
             Sharpen Strength
           </TooltipContent>
         </Tooltip>
-        <div className="flex min-w-[140px] flex-1 items-center gap-2">
+        <div className="flex min-w-35 flex-1 items-center gap-2">
           <Slider
             min={0}
             max={300}

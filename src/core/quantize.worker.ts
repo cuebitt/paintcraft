@@ -1,12 +1,12 @@
-import { quantize, type QuantMethod, type QuantizeOptions } from "@/core/quantize";
-import type { RGB } from "@/core/palette";
-import type { ImageFitMode } from "@/types";
+import { quantize, type QuantMethod, type QuantizeOptions } from "./quantize";
+import type { RGB } from "./palette";
+import type { ImageFitMode } from "../types";
 import {
   computeScale,
   rgbString,
   type ErrorResponse,
   type SerializedImageData,
-} from "@/core/image-utils";
+} from "./image-utils";
 
 interface QuantizeRequest {
   type: "quantize";

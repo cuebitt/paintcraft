@@ -1,5 +1,5 @@
-import { imageDataToBlob } from "@/lib/utils";
-import type { ErrorResponse } from "@/core/image-utils";
+import { imageDataToBlob } from "../lib/utils";
+import type { ErrorResponse } from "../core/image-utils";
 
 interface ParseAsepriteRequest {
   type: "parseAseprite";
@@ -85,12 +85,12 @@ async function parseImageDataFile(
 }
 
 async function parseAseprite(buffer: ArrayBuffer): Promise<ParseResponse> {
-  const { readAsepriteFile } = await import("@/formats/aseprite");
+  const { readAsepriteFile } = await import("./aseprite");
   return parseImageDataFile(buffer, readAsepriteFile);
 }
 
 async function parsePsd(buffer: ArrayBuffer): Promise<ParseResponse> {
-  const { readPsdFile } = await import("@/formats/psd");
+  const { readPsdFile } = await import("./psd");
   return parseImageDataFile(buffer, readPsdFile);
 }
 
@@ -115,7 +115,7 @@ async function canvasToPngBytes(
 }
 
 async function parsePiskel(text: string): Promise<ParseResponse> {
-  const { parsePiskel } = await import("@/formats/piskel");
+  const { parsePiskel } = await import("./piskel");
   const canvas = await parsePiskel(text);
 
   return {
@@ -127,7 +127,7 @@ async function parsePiskel(text: string): Promise<ParseResponse> {
 }
 
 async function parsePixil(text: string): Promise<ParseResponse> {
-  const { parsePixil } = await import("@/formats/pixil");
+  const { parsePixil } = await import("./pixil");
   const canvas = await parsePixil(text);
 
   return {

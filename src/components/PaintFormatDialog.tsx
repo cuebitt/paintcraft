@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { FileTextIcon } from "lucide-react";
 import DOMPurify from "dompurify";
+import "highlight.js/styles/github-dark.css";
 import rawHtml from "@/content/paint_file_format.md?html";
 
 const html = DOMPurify.sanitize(rawHtml);
@@ -33,7 +34,7 @@ export function PaintFormatDialog() {
           </DialogDescription>
         </DialogHeader>
         <article
-          className="prose prose-sm max-h-[60vh] max-w-none overflow-y-auto dark:prose-invert prose-headings:text-foreground prose-strong:text-foreground prose-code:text-foreground prose-th:text-foreground"
+          className="prose prose-sm max-h-[60vh] max-w-none overflow-y-auto dark:prose-invert prose-headings:text-foreground prose-strong:text-foreground prose-th:text-foreground"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </DialogContent>

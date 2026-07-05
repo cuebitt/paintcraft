@@ -1,6 +1,35 @@
 import fs from "node:fs";
 import path from "node:path";
 import { micromark } from "micromark";
+import { gfm, gfmHtml } from "micromark-extension-gfm";
+import hljs from "highlight.js/lib/core";
+import json from "highlight.js/lib/languages/json";
+
+hljs.registerLanguage("json", json);
+
+const LANG_MAP: Record<string, string> = {
+  jsonc: "json",
+};
+
+function highlightHtml(html: string): string {
+  return html.replace(
+    /<pre><code class="language-(\w+)">([\s\S]*?)<\/code><\/pre>/g,
+    (_, lang, code) => {
+      const hljsLang = LANG_MAP[lang] ?? lang;
+      const decoded = code
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, '"');
+      try {
+        const highlighted = hljs.highlight(decoded, { language: hljsLang }).value;
+        return `<pre><code class="language-${lang}">${highlighted}</code></pre>`;
+      } catch {
+        return `<pre><code class="language-${lang}">${code}</code></pre>`;
+      }
+    },
+  );
+}
 
 interface Plugin {
   name: string;
@@ -28,8 +57,9 @@ export function markdownHtml(): Plugin {
       const filePath = id.slice(0, -suffix.length);
       const resolved = path.normalize(filePath);
       const content = fs.readFileSync(resolved, "utf-8");
+      const html = micromark(content, { extensions: [gfm()], htmlExtensions: [gfmHtml()] });
       return {
-        code: `export default ${JSON.stringify(micromark(content))}`,
+        code: `export default ${JSON.stringify(highlightHtml(html))}`,
         map: null,
       };
     },

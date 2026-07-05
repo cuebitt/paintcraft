@@ -95,7 +95,7 @@ export async function writePaintFile(
     fields.img = data.originalImage;
   }
 
-  // Format-specific fields for jop-2x
+  // jop-2x has extra fields
   if (format === "jop-2x") {
     const hasGlass = data.glass ?? false;
     fields.glass = new Int8(hasGlass ? 1 : 0);
@@ -144,7 +144,7 @@ export async function readPaintFile(data: ArrayBuffer | Uint8Array): Promise<Pai
     argb & 0xff,
   ]);
 
-  // Detect format from fields present
+  // TODO: format detection based on field presence is fragile — check a format flag if available
   const hasGlass = "glass" in root;
   const hasSidePixels = "sidePixels" in root;
   const hasSidesActive = "sidesActive" in root;
@@ -158,7 +158,6 @@ export async function readPaintFile(data: ArrayBuffer | Uint8Array): Promise<Pai
     detectedFormat = "jop-1x";
   }
 
-  // Parse format-specific fields
   let glass = false;
   let sidePixels: [number, number, number][] | undefined;
   let sidesActive = false;

@@ -72,6 +72,9 @@ function applyPalette(inPC: utils.PointContainer, palette: utils.Palette): utils
   });
 }
 
+// TODO: quantizeMedianCut, quantizeNeuQuant, and quantizeWuQuant are nearly
+// identical — the only difference is the paletteQuantization value and the
+// alpha-preservation step in median-cut. Should deduplicate.
 function quantizeMedianCut(imageData: ImageData, options: QuantizeOptions): QuantizeResult {
   const { data } = imageData;
   const alpha = new Uint8Array(data.length / 4);

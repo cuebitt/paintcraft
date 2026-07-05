@@ -149,14 +149,14 @@ export async function exportPaintFile(
     }
   }
 
-  // Sample edge pixels for sides when format is jop-2x and sidesActive
+  // grab edge pixels for jop-2x side rendering
   let sidePixels: [number, number, number][] | undefined;
   if (state.paintFormat === "jop-2x" && state.sidesActive) {
     const { width, height } = state.selectedCanvas;
     sidePixels = [];
     let idx = 0;
 
-    // Top row (left to right)
+    // top + bottom
     for (let x = 0; x < width; x++) {
       const pixelIdx = x;
       sidePixels[idx++] = [
@@ -165,8 +165,6 @@ export async function exportPaintFile(
         quantized.data[pixelIdx * 4 + 2]!,
       ];
     }
-
-    // Bottom row (left to right)
     for (let x = 0; x < width; x++) {
       const pixelIdx = (height - 1) * width + x;
       sidePixels[idx++] = [
@@ -176,7 +174,7 @@ export async function exportPaintFile(
       ];
     }
 
-    // Left column (top to bottom)
+    // left + right
     for (let y = 0; y < height; y++) {
       const pixelIdx = y * width;
       sidePixels[idx++] = [
@@ -185,8 +183,6 @@ export async function exportPaintFile(
         quantized.data[pixelIdx * 4 + 2]!,
       ];
     }
-
-    // Right column (top to bottom)
     for (let y = 0; y < height; y++) {
       const pixelIdx = y * width + (width - 1);
       sidePixels[idx++] = [
@@ -231,6 +227,14 @@ export async function exportPaintFile(
   const blob = new Blob([paintBuffer as BlobPart], { type: "application/octet-stream" });
   downloadBlob(blob, filename);
 }
+
+// export function exportPngOld(workers: ImageProcessorWorkers): void {
+//   // old approach — kept for reference in case OffscreenCanvas has issues
+//   const { quantized } = workers.quantizedDataRef.current!;
+//   const link = document.createElement("a");
+//   link.download = `painting_${Date.now()}.png`;
+//   // ...would need canvas.toDataURL here
+// }
 
 export function exportPng(workers: ImageProcessorWorkers): void {
   if (!workers.quantizedDataRef.current) return;

@@ -222,6 +222,7 @@ export const useAppStore = create<StoreState>()((set, get) => ({
   },
   setLoading: (loading) => get()._set({ loading }, "setLoading"),
   setError: (error) => get()._set({ error, loading: false }, "setError"),
+  // these are all the same pattern — could probably batch them
   setCanvas: (canvas) => get()._set({ selectedCanvas: canvas }, "setCanvas"),
   setShowGrid: (show) => get()._set({ showGrid: show }, "setShowGrid"),
   setQuantMethod: (method) => get()._set({ quantMethod: method }, "setQuantMethod"),

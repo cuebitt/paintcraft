@@ -79,6 +79,30 @@ vp test
 vp test watch
 ```
 
+## Embedding (iframe)
+
+paintcraft can be embedded in any page via an iframe. The site is configured with `frame-ancestors *` so no additional CSP changes are needed.
+
+```html
+<iframe
+  src="https://voidzero.dev/paintcraft/?embed&theme=dark&accent=teal"
+  width="100%"
+  height="800"
+  style="border: none;"
+  title="paintcraft"
+></iframe>
+```
+
+Add `?embed` to the URL to prevent localStorage writes. Optional parameters:
+
+| Parameter | Values                                                                | Description                 |
+| --------- | --------------------------------------------------------------------- | --------------------------- |
+| `theme`   | `dark`, `light`, `system`                                             | Override the UI theme       |
+| `accent`  | `orange`, `rose`, `yellow`, `green`, `teal`, `blue`, `violet`, `pink` | Override the accent color   |
+| `image`   | URL (data URI, base64, or fetchable URL)                              | Auto-load an image on start |
+
+See the [GitHub Pages](#github-pages) section below if you're self-hosting.
+
 ### GitHub Pages
 
 Deploys automatically on push to `main` with [GitHub Actions](.github/workflows/deploy.yml). To enable, go to **Settings > Pages > Source** and choose **GitHub Actions**.

@@ -2,10 +2,12 @@ import { useEffect, useRef } from "preact/hooks";
 import { useAppStore } from "@/app/store";
 import { savePreferences } from "@/hooks/preferences";
 
-export function useLocalStorage(theme: string) {
+export function useLocalStorage(theme: string, disabled?: boolean) {
   const prevRef = useRef("");
 
   useEffect(() => {
+    if (disabled) return;
+
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const unsub = useAppStore.subscribe((s) => {
@@ -30,5 +32,5 @@ export function useLocalStorage(theme: string) {
       unsub();
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [theme]);
+  }, [theme, disabled]);
 }

@@ -28,9 +28,11 @@ function App() {
       new URLSearchParams(window.location.search).has("embed"));
 
   useEffect(() => {
-    restorePreferencesFromStorage();
-  }, []);
-  useLocalStorage("dark");
+    if (!isEmbedded) {
+      restorePreferencesFromStorage();
+    }
+  }, [isEmbedded]);
+  useLocalStorage("dark", isEmbedded);
 
   const { startTimer, endTimer } = usePerformanceMonitor();
 

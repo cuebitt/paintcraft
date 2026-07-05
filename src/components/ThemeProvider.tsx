@@ -25,6 +25,9 @@ type ThemeProviderProps = {
   children: ComponentChildren;
   defaultTheme?: Theme;
   storageKey?: string;
+  embedTheme?: Theme | null;
+  embedAccent?: string | null;
+  embedMode?: boolean;
 };
 
 type ThemeProviderState = {
@@ -56,43 +59,55 @@ export function ThemeProvider({
   children,
   defaultTheme = "system",
   storageKey = "vite-ui-theme",
+  embedTheme,
+  embedAccent,
+  embedMode = false,
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(() =>
-    parseTheme(localStorage.getItem(storageKey), defaultTheme),
+  const [userTheme, setUserTheme] = useState<Theme>(
+    () =>
+      embedTheme ??
+      (embedMode ? defaultTheme : parseTheme(localStorage.getItem(storageKey), defaultTheme)),
   );
 
-  const [accentColor, setAccentColorState] = useState<AccentColor>(() => {
-    const stored = localStorage.getItem(`${storageKey}-accent`);
-    if (stored) {
-      return ACCENT_COLORS.find((c) => c.name === stored) ?? ACCENT_COLORS[0]!;
+  const [userAccentColor, setUserAccentColor] = useState<AccentColor>(() => {
+    if (embedMode) {
+      return embedAccent
+        ? (ACCENT_COLORS.find((c) => c.name.toLowerCase() === embedAccent.toLowerCase()) ??
+            ACCENT_COLORS[0]!)
+        : ACCENT_COLORS[0]!;
     }
-    return ACCENT_COLORS[0]!;
+    return resolveAccent(embedAccent ?? null, storageKey);
   });
 
   const [showTooltips, setShowTooltipsState] = useState<boolean>(() => {
+    if (embedMode) return true;
     const stored = localStorage.getItem(`${storageKey}-tooltips`);
     return stored !== "false";
   });
 
+  const theme = embedTheme ?? userTheme;
+  const accentColor = embedAccent
+    ? (ACCENT_COLORS.find((c) => c.name.toLowerCase() === embedAccent.toLowerCase()) ??
+      ACCENT_COLORS[0]!)
+    : userAccentColor;
+
   useEffect(() => {
     const root = window.document.documentElement;
+    root.classList.remove("light", "dark");
+    const resolved = resolveMode(theme);
+    root.classList.add(resolved);
 
-    const apply = () => {
-      root.classList.remove("light", "dark");
-      const resolved = resolveMode(theme);
-      root.classList.add(resolved);
-
-      const hue = accentColor[resolved].match(/oklch\([\d.]+ [\d.]+ ([\d.]+)/)?.[1] ?? "55";
-      root.style.setProperty("--accent", accentColor[resolved]);
-      root.style.setProperty("--accent-hue", hue);
-    };
-
-    apply();
+    const hue = accentColor[resolved].match(/oklch\([\d.]+ [\d.]+ ([\d.]+)/)?.[1] ?? "55";
+    root.style.setProperty("--accent", accentColor[resolved]);
+    root.style.setProperty("--accent-hue", hue);
 
     if (theme === "system") {
       const mq = window.matchMedia("(prefers-color-scheme: dark)");
-      const handler = () => apply();
+      const handler = () => {
+        root.classList.remove("light", "dark");
+        root.classList.add(resolveMode(theme));
+      };
       mq.addEventListener("change", handler);
       return () => mq.removeEventListener("change", handler);
     }
@@ -100,26 +115,26 @@ export function ThemeProvider({
 
   const setAccentColor = useCallback(
     (color: AccentColor) => {
-      localStorage.setItem(`${storageKey}-accent`, color.name);
-      setAccentColorState(color);
+      if (!embedMode) localStorage.setItem(`${storageKey}-accent`, color.name);
+      setUserAccentColor(color);
     },
-    [storageKey],
+    [embedMode, storageKey],
   );
 
   const setShowTooltips = useCallback(
     (show: boolean) => {
-      localStorage.setItem(`${storageKey}-tooltips`, String(show));
+      if (!embedMode) localStorage.setItem(`${storageKey}-tooltips`, String(show));
       setShowTooltipsState(show);
     },
-    [storageKey],
+    [embedMode, storageKey],
   );
 
   const handleSetTheme = useCallback(
     (newTheme: Theme) => {
-      localStorage.setItem(storageKey, newTheme);
-      setTheme(newTheme);
+      if (!embedMode) localStorage.setItem(storageKey, newTheme);
+      setUserTheme(newTheme);
     },
-    [storageKey],
+    [embedMode, storageKey],
   );
 
   const value = useMemo(
@@ -139,6 +154,20 @@ export function ThemeProvider({
       {children}
     </ThemeProviderContext.Provider>
   );
+}
+
+function resolveAccent(embedAccent: string | null, storageKey: string): AccentColor {
+  if (embedAccent) {
+    return (
+      ACCENT_COLORS.find((c) => c.name.toLowerCase() === embedAccent.toLowerCase()) ??
+      ACCENT_COLORS[0]!
+    );
+  }
+  const stored = localStorage.getItem(`${storageKey}-accent`);
+  if (stored) {
+    return ACCENT_COLORS.find((c) => c.name === stored) ?? ACCENT_COLORS[0]!;
+  }
+  return ACCENT_COLORS[0]!;
 }
 
 export const useTheme = () => {

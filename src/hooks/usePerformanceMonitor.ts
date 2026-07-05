@@ -14,10 +14,6 @@ export function usePerformanceMonitor() {
     const duration = performance.now() - start;
     timersRef.current!.delete(name);
 
-    if (import.meta.env.DEV) {
-      console.log(`[perf] ${name}: ${duration.toFixed(2)}ms`);
-    }
-
     return duration;
   }, []);
 

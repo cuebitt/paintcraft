@@ -1,9 +1,9 @@
-import { useEffect, useRef, useCallback, useMemo } from "preact/hooks";
+import { useEffect, useRef, useCallback, useMemo, useState } from "preact/hooks";
 import { AppHeader } from "@/components/AppHeader";
 import { UploadDropzone } from "@/components/UploadDropzone";
-import { Toolbar } from "@/components/Toolbar";
-import { ImageComparison } from "@/components/ImageComparison";
 import { PalettesSection } from "@/components/PalettesSection";
+import { EmbedLayout } from "@/components/EmbedLayout";
+import { ResultCards } from "@/components/ResultCards";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useImageProcessor, type ProcessImageFn } from "@/hooks/useImageProcessor";
 import { useAppCallbacks } from "@/hooks/useAppCallbacks";
@@ -11,14 +11,25 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
 import { useClipboard } from "@/hooks/useClipboard";
+import { resolveImageParam } from "@/hooks/useEmbedMode";
 import { preprocessImageForCanvas } from "@/core/preprocess";
-import { useAppStore, getProcessImageArgs } from "@/app/store";
+import { useAppStore, getProcessImageArgs, restorePreferencesFromStorage } from "@/app/store";
 import { dispatchError } from "@/lib/helpers";
 
 function App() {
   const state = useAppStore();
   const { undo, redo } = state;
+  const [showOriginal, setShowOriginal] = useState(false);
 
+  const isEmbedded =
+    typeof window !== "undefined" &&
+    (window.self !== window.top ||
+      window.location.pathname.includes("embed") ||
+      new URLSearchParams(window.location.search).has("embed"));
+
+  useEffect(() => {
+    restorePreferencesFromStorage();
+  }, []);
   useLocalStorage("dark");
 
   const { startTimer, endTimer } = usePerformanceMonitor();
@@ -129,6 +140,20 @@ function App() {
     "ctrl+shift+c": handleCopyToClipboard,
   });
 
+  useEffect(() => {
+    if (!isEmbedded) return;
+    const params = new URLSearchParams(window.location.search);
+    const imageParam = params.get("image");
+    if (!imageParam) return;
+    let cancelled = false;
+    void resolveImageParam(imageParam).then((file) => {
+      if (file && !cancelled) handleUpload(file);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isEmbedded, handleUpload]);
+
   const reprocessTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (reprocessTimeoutRef.current !== null) {
@@ -165,16 +190,56 @@ function App() {
   ]);
 
   const hasResults = useMemo(
-    () => state.originalUrl && state.preprocessedUrl && state.quantizedUrl,
+    () => !!(state.originalUrl && state.preprocessedUrl && state.quantizedUrl),
     [state.originalUrl, state.preprocessedUrl, state.quantizedUrl],
   );
+
+  const activeUrl = showOriginal ? state.originalUrl : state.quantizedUrl;
+
+  const handleReset = useCallback(() => useAppStore.getState().reset(), []);
+  const onToggleOriginal = useCallback(() => setShowOriginal((p) => !p), []);
+
+  const preview = useMemo(
+    () => ({
+      showOriginal,
+      showTransparencyGrid: state.showTransparencyGrid,
+      showGrid: state.showGrid,
+      activeUrl,
+      cellsX: state.selectedCanvas.cellsX,
+      cellsY: state.selectedCanvas.cellsY,
+    }),
+    [
+      showOriginal,
+      state.showTransparencyGrid,
+      state.showGrid,
+      activeUrl,
+      state.selectedCanvas.cellsX,
+      state.selectedCanvas.cellsY,
+    ],
+  );
+
+  if (isEmbedded) {
+    return (
+      <EmbedLayout
+        hasResults={hasResults}
+        error={state.error}
+        handleUpload={handleUpload}
+        loading={state.loading}
+        handleExportPng={handleExportPng}
+        handleExportPaintFile={handleExportPaintFile}
+        handleReset={handleReset}
+        onToggleOriginal={onToggleOriginal}
+        preview={preview}
+      />
+    );
+  }
 
   return (
     <TooltipProvider>
       <div className="flex min-h-screen flex-col bg-background">
         <AppHeader />
 
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
           {state.error && (
             <div
               role="alert"
@@ -184,41 +249,34 @@ function App() {
             </div>
           )}
 
-          {!hasResults ? (
-            <div className="mx-auto max-w-2xl">
-              <UploadDropzone onUpload={handleUpload} loading={state.loading} />
-              <p className="mt-4 text-center text-sm text-muted-foreground">
-                Maximum file size: 10MB. Supported formats: PNG, JPG, WEBP, GIF, .paint, .ase,
-                .aseprite, .psd, .svg, .piskel, .pixil
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-8">
-              <Toolbar onExportPaint={handleExportPaintFile} onExportPng={handleExportPng} />
-              <ImageComparison
-                originalUrl={state.originalUrl}
-                quantizedUrl={state.quantizedUrl}
-                showGrid={state.showGrid}
-                cellsX={state.selectedCanvas.cellsX}
-                cellsY={state.selectedCanvas.cellsY}
-                colorCount={state.quantizationEnabled ? state.adaptiveColorCount : 0}
-                quantizationEnabled={state.quantizationEnabled}
-                showTransparencyGrid={state.showTransparencyGrid}
+          <div className="flex min-h-0 flex-1 flex-col">
+            {hasResults ? (
+              <ResultCards
+                handleExportPng={handleExportPng}
+                handleExportPaintFile={handleExportPaintFile}
+                loading={state.loading}
+                handleReset={handleReset}
+                onToggleOriginal={onToggleOriginal}
+                preview={preview}
               />
+            ) : (
+              <div className="mx-auto w-full max-w-2xl">
+                <UploadDropzone onUpload={handleUpload} loading={state.loading} />
+              </div>
+            )}
+          </div>
 
-              {state.quantizationEnabled && (
-                <PalettesSection
-                  adaptivePalette={state.adaptivePalette}
-                  adaptiveColorCount={state.adaptiveColorCount}
-                />
-              )}
-            </div>
+          {hasResults && state.quantizationEnabled && (
+            <PalettesSection
+              adaptivePalette={state.adaptivePalette}
+              adaptiveColorCount={state.adaptiveColorCount}
+            />
           )}
         </main>
 
         <footer className="border-t border-border bg-background/80">
           <div className="mx-auto max-w-7xl px-4 py-4 text-center text-sm text-muted-foreground sm:px-6 lg:px-8">
-            paintcraft - Built with React + shadcn/ui + TailwindCSS
+            paintcraft - Built with Preact + shadcn/ui + TailwindCSS
             <span className="mx-2">·</span>
             <a
               href="https://github.com/cuebitt/paintcraft"

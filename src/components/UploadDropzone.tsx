@@ -4,16 +4,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2Icon, UploadIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+function formatSize(bytes: number): string {
+  const mb = bytes / (1024 * 1024);
+  return `${mb.toFixed(1)} MB`;
+}
+
+const SOFT_LIMIT = 100 * 1024 * 1024;
+
+function confirmLargeFile(file: File): boolean {
+  if (file.size <= SOFT_LIMIT) return true;
+  return window.confirm(
+    `The file "${file.name}" is ${formatSize(file.size)}. Loading very large files may cause performance issues. Do you want to continue?`,
+  );
+}
+
 interface UploadDropzoneProps {
   onUpload: (file: File) => void;
   loading?: boolean;
   disabled?: boolean;
+  className?: string;
 }
 
 export function UploadDropzone({
   onUpload,
   loading = false,
   disabled = false,
+  className,
 }: UploadDropzoneProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragActive, setIsDragActive] = useState(false);
@@ -34,12 +50,12 @@ export function UploadDropzone({
     setIsDragActive(false);
 
     const file = e.dataTransfer?.files[0];
-    if (file) onUpload(file);
+    if (file && confirmLargeFile(file)) onUpload(file);
   };
 
   const handleFileChange = (e: Event) => {
     const file = (e.target as HTMLInputElement).files?.[0];
-    if (file) onUpload(file);
+    if (file && confirmLargeFile(file)) onUpload(file);
   };
 
   const handleKeyDown = (e: TargetedKeyboardEvent<HTMLDivElement>) => {
@@ -52,9 +68,10 @@ export function UploadDropzone({
   return (
     <Card
       className={cn(
-        "relative cursor-pointer border-2 border-dashed transition-colors",
+        "relative cursor-pointer flex-col justify-center border-2 border-dashed transition-colors",
         isDragActive ? "border-accent bg-accent/5" : "border-border hover:border-accent/50",
         (disabled || loading) && "pointer-events-none opacity-50",
+        className,
       )}
       onDragEnter={handleDrag}
       onDragLeave={handleDrag}

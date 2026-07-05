@@ -103,12 +103,12 @@ Deploys automatically on push to `main` with [GitHub Actions](.github/workflows/
 | 1     | 2x1 Long Canvas  | 32×16      | 2×1   | 512    | ✅     | ✅     | ✅        |
 | 2     | 1x2 Tall Canvas  | 16×32      | 1×2   | 512    | ✅     | ✅     | ✅        |
 | 3     | 2x2 Square       | 32×32      | 2×2   | 1024   | ✅     | ✅     | ✅        |
-| 4     | 3x3 Square       | 48×48      | 3×3   | 2304   | ❌     | ✅     | ✅        |
-| 5     | 4x4 Large Square | 64×64      | 4×4   | 4096   | ❌     | ✅     | ✅        |
-| 6     | 3x2 Medium       | 48×32      | 3×2   | 1536   | ❌     | ✅     | ✅        |
-| 7     | 4x3 Wide         | 64×48      | 4×3   | 3072   | ❌     | ✅     | ✅        |
-| 8     | 2x3 Medium       | 32×48      | 2×3   | 1536   | ❌     | ✅     | ✅        |
-| 9     | 3x4 Tall         | 48×64      | 3×4   | 3072   | ❌     | ✅     | ✅        |
+| 4     | 3x3 Square       | 48×48      | 3×3   | 2304   | ❌     | ❌     | ✅        |
+| 5     | 4x4 Large Square | 64×64      | 4×4   | 4096   | ❌     | ❌     | ✅        |
+| 6     | 3x2 Medium       | 48×32      | 3×2   | 1536   | ❌     | ❌     | ✅        |
+| 7     | 4x3 Wide         | 64×48      | 4×3   | 3072   | ❌     | ❌     | ✅        |
+| 8     | 2x3 Medium       | 32×48      | 2×3   | 1536   | ❌     | ❌     | ✅        |
+| 9     | 3x4 Tall         | 48×64      | 3×4   | 3072   | ❌     | ❌     | ✅        |
 
 ## .paint file format
 

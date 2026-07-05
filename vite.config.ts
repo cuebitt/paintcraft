@@ -39,6 +39,7 @@ export default defineConfig({
     },
     ignorePatterns: ["dist"],
   },
+  // @ts-expect-error -- lazyPlugins return type incompatibility with Vite PluginOption
   plugins: lazyPlugins(() => [preact(), tailwindcss(), markdownHtml()]),
   build: {
     rollupOptions: {

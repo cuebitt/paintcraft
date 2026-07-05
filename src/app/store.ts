@@ -37,8 +37,6 @@ export interface AppState {
   glassPadding: boolean;
 }
 
-const restoredPreferences = loadPreferences();
-
 const initialState: AppState = {
   originalUrl: null,
   preprocessedUrl: null,
@@ -62,12 +60,11 @@ const initialState: AppState = {
   author: "",
   signed: false,
   embedOriginalImage: true,
-  paintFormat: "jop-delta",
+  paintFormat: "jop-1x",
   glass: false,
   sidesActive: false,
   showTransparencyGrid: true,
   glassPadding: false,
-  ...restoredPreferences,
 };
 
 const MAX_HISTORY = 50;
@@ -286,6 +283,13 @@ export const useAppStore = create<StoreState>()((set, get) => ({
     set({ ...initialState, past: [], future: [] });
   },
 }));
+
+export function restorePreferencesFromStorage() {
+  const prefs = loadPreferences();
+  if (Object.keys(prefs).length > 0) {
+    useAppStore.getState()._set(prefs);
+  }
+}
 
 export function getProcessImageArgs(s: AppState) {
   return [

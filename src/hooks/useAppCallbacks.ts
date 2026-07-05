@@ -23,7 +23,7 @@ export function useAppCallbacks(processImage: ProcessImageFn, workers: ImageProc
   const workersRef = useRef(workers);
   workersRef.current = workers;
 
-  const readIntoImportWorker = useCallback(
+  const readIntoWorker = useCallback(
     (
       file: File,
       type: string,
@@ -67,7 +67,7 @@ export function useAppCallbacks(processImage: ProcessImageFn, workers: ImageProc
       }
       for (const [ext, handler] of Object.entries(IMPORT_HANDLERS)) {
         if (file.name.endsWith(ext)) {
-          readIntoImportWorker(file, handler.type, handler.extract, handler.text);
+          readIntoWorker(file, handler.type, handler.extract, handler.text);
           return;
         }
       }
@@ -92,7 +92,7 @@ export function useAppCallbacks(processImage: ProcessImageFn, workers: ImageProc
       };
       reader.readAsDataURL(file);
     },
-    [handleImportPaintFile, readIntoImportWorker],
+    [handleImportPaintFile, readIntoWorker],
   );
 
   const handleExportPaintFile = useCallback(() => {

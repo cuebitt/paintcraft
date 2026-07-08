@@ -80,25 +80,33 @@ export function ResultCards({
         </CardHeader>
         <CardContent className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden">
           {activeUrl && (
-            <>
-              {showTransparencyGrid && <div className="transparency-grid absolute inset-0" />}
-              <img
-                src={activeUrl}
-                alt={showOriginal ? "Original preview" : "Processed preview"}
-                className="image-rendering-pixelated relative z-10 h-full w-full object-contain"
-              />
-              {!showOriginal && showGrid && (
-                <div
-                  className="pointer-events-none absolute inset-0 z-20"
-                  style={{
-                    backgroundImage: `
-                      repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 1px, transparent 1px, transparent ${100 / cellsX}%),
-                      repeating-linear-gradient(0deg, var(--accent) 0, var(--accent) 1px, transparent 1px, transparent ${100 / cellsY}%)
-                    `,
-                  }}
+            <div className="relative h-full w-full">
+              <div
+                className="absolute top-1/2 left-1/2 max-h-full w-full"
+                style={{
+                  aspectRatio: `${cellsX} / ${cellsY}`,
+                  transform: "translate(-50%, -50%)",
+                }}
+              >
+                {showTransparencyGrid && <div className="transparency-grid absolute inset-0" />}
+                <img
+                  src={activeUrl}
+                  alt={showOriginal ? "Original preview" : "Processed preview"}
+                  className="image-rendering-pixelated relative z-10 h-full w-full object-contain"
                 />
-              )}
-            </>
+                {!showOriginal && showGrid && (
+                  <div
+                    className="pointer-events-none absolute inset-0 z-20"
+                    style={{
+                      backgroundImage: `
+                        repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 1px, transparent 1px, transparent ${100 / cellsX}%),
+                        repeating-linear-gradient(0deg, var(--accent) 0, var(--accent) 1px, transparent 1px, transparent ${100 / cellsY}%)
+                      `,
+                    }}
+                  />
+                )}
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>

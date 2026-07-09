@@ -29,7 +29,7 @@ export function ResultCards({
   onToggleOriginal,
   preview,
 }: ResultCardsProps) {
-  const { showOriginal, showTransparencyGrid, activeUrl, showGrid, cellsX, cellsY } = preview;
+  const { showOriginal, showTransparencyGrid, showGrid, activeUrl, cellsX, cellsY } = preview;
 
   return (
     <div className="flex min-h-0 flex-1 gap-2">
@@ -89,22 +89,22 @@ export function ResultCards({
                 }}
               >
                 {showTransparencyGrid && <div className="transparency-grid absolute inset-0" />}
+                {showGrid && (
+                  <div
+                    className="cell-grid pointer-events-none absolute inset-0 z-20"
+                    style={
+                      {
+                        "--grid-cols": cellsX,
+                        "--grid-rows": cellsY,
+                      } as React.CSSProperties
+                    }
+                  />
+                )}
                 <img
                   src={activeUrl}
                   alt={showOriginal ? "Original preview" : "Processed preview"}
                   className="image-rendering-pixelated relative z-10 h-full w-full object-contain"
                 />
-                {!showOriginal && showGrid && (
-                  <div
-                    className="pointer-events-none absolute inset-0 z-20"
-                    style={{
-                      backgroundImage: `
-                        repeating-linear-gradient(90deg, var(--accent) 0, var(--accent) 1px, transparent 1px, transparent ${100 / cellsX}%),
-                        repeating-linear-gradient(0deg, var(--accent) 0, var(--accent) 1px, transparent 1px, transparent ${100 / cellsY}%)
-                      `,
-                    }}
-                  />
-                )}
               </div>
             </div>
           )}

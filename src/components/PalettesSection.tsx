@@ -26,7 +26,7 @@ export const PalettesSection = memo(function PalettesSection({
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-8 lg:flex-row">
+      <div className="flex flex-col gap-2 lg:flex-row">
         <PaletteDisplay title="Fixed Palette (16 colors)" colors={FIXED_PALETTE} />
         <div className="flex min-w-50 flex-1 flex-col gap-3">
           <PaletteDisplay

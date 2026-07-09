@@ -1,8 +1,7 @@
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef } from "preact/hooks";
 import { useResizeObserver, useDisclosure } from "@mantine/hooks";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   ArrowLeftRightIcon,
   PaintBucketIcon,
@@ -13,6 +12,62 @@ import {
 } from "lucide-react";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { cn } from "@/lib/utils";
+
+type ExportButtonsProps = {
+  handleExportPng: () => void;
+  handleExportPaintFile: () => void;
+  handleReset: () => void;
+  loading: boolean;
+  variant?: "secondary" | "outline";
+  labels?: "full" | "short";
+};
+
+function ExportButtons({
+  handleExportPng,
+  handleExportPaintFile,
+  handleReset,
+  loading,
+  variant = "secondary",
+  labels = "full",
+}: ExportButtonsProps) {
+  const paintLabel = labels === "short" ? ".paint" : "Export .paint";
+  const pngLabel = labels === "short" ? "PNG" : "Export PNG";
+
+  return (
+    <>
+      <Button
+        variant={variant}
+        size="sm"
+        onClick={handleExportPaintFile}
+        disabled={loading}
+        className={labels === "short" ? "min-h-9 gap-1 text-xs" : "text-xs"}
+      >
+        <PaintBucketIcon className="size-3.5" />
+        {paintLabel}
+      </Button>
+      <Button
+        variant={variant}
+        size="sm"
+        onClick={handleExportPng}
+        disabled={loading}
+        className={labels === "short" ? "min-h-9 gap-1 text-xs" : "text-xs"}
+      >
+        <ImageIcon className="size-3.5" />
+        {pngLabel}
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleReset}
+        disabled={loading}
+        className={labels === "short" ? "min-h-9 gap-1 text-xs" : "text-xs"}
+      >
+        <UploadIcon className="size-3.5" />
+        New
+      </Button>
+    </>
+  );
+}
 
 export type PreviewOptions = {
   showOriginal: boolean;
@@ -44,21 +99,25 @@ export function ResultCards({
 }: ResultCardsProps) {
   const { showOriginal, showTransparencyGrid, showGrid, activeUrl, cellsX, cellsY } = preview;
   const [mobileSettingsOpen, { toggle: toggleMobileSettings }] = useDisclosure(false);
+  const previewRef = useRef<HTMLDivElement>(null);
   const resizeObserver = useResizeObserver<HTMLDivElement>();
   const containerRef = resizeObserver[0] as import("preact").RefObject<HTMLDivElement>;
   const rect = resizeObserver[1];
-  const [fitStyle, setFitStyle] = useState<{ width: number; height: number } | null>(null);
-
-  const ratio = cellsX / cellsY;
 
   useEffect(() => {
-    if (!rect) return;
-    const { width: w, height: h } = rect;
-    if (w === 0 || h === 0) return;
-    const fromW = { width: w, height: Math.round(w / ratio) };
-    const fromH = { width: Math.round(h * ratio), height: h };
-    setFitStyle(fromW.height <= h ? fromW : fromH);
-  }, [rect, ratio]);
+    const el = previewRef.current;
+    if (!rect || !el) return;
+    const { width: cw, height: ch } = rect;
+    if (cw === 0 || ch === 0) return;
+    const h = Math.min(Math.floor(cw / cellsX), Math.floor(ch / cellsY));
+    if (h <= 0) return;
+    const w = h * cellsX;
+    const he = h * cellsY;
+    if (el.style.width !== `${w}px` || el.style.height !== `${he}px`) {
+      el.style.width = `${w}px`;
+      el.style.height = `${he}px`;
+    }
+  }, [rect, cellsX, cellsY]);
 
   return (
     <div className={cn("flex min-h-0 flex-1 flex-col gap-2 md:flex-row", className)}>
@@ -70,36 +129,14 @@ export function ResultCards({
         )}
       >
         <CardHeader className="flex flex-row flex-wrap items-center gap-1">
-          <Button
+          <ExportButtons
+            handleExportPng={handleExportPng}
+            handleExportPaintFile={handleExportPaintFile}
+            handleReset={handleReset}
+            loading={loading}
             variant="secondary"
-            size="sm"
-            onClick={handleExportPaintFile}
-            disabled={loading}
-            className="text-xs"
-          >
-            <PaintBucketIcon className="size-3.5" />
-            Export .paint
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleExportPng}
-            disabled={loading}
-            className="text-xs"
-          >
-            <ImageIcon className="size-3.5" />
-            Export PNG
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleReset}
-            disabled={loading}
-            className="text-xs"
-          >
-            <UploadIcon className="size-3.5" />
-            New
-          </Button>
+            labels="full"
+          />
         </CardHeader>
         <CardContent className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <SettingsPanel />
@@ -113,17 +150,20 @@ export function ResultCards({
             {showOriginal ? "Original" : "Processed"}
           </Button>
         </CardHeader>
-        <CardContent className="relative flex min-h-0 flex-1 overflow-hidden p-2">
+        <CardContent className="relative min-h-0 flex-1 overflow-hidden p-2">
           {activeUrl && showTransparencyGrid && (
             <div className="transparency-grid pointer-events-none absolute inset-0 z-0" />
           )}
-          <div ref={containerRef} className="flex h-full w-full items-center justify-center">
-            {activeUrl && fitStyle && (
-              <AspectRatio ratio={ratio} style={{ width: fitStyle.width, height: fitStyle.height }}>
+          <div
+            ref={containerRef}
+            className="absolute inset-0 flex items-center justify-center overflow-hidden p-2"
+          >
+            {activeUrl && (
+              <div ref={previewRef} className="relative">
                 <img
                   src={activeUrl}
                   alt={showOriginal ? "Original preview" : "Processed preview"}
-                  className="image-rendering-pixelated absolute inset-0 h-full w-full object-contain"
+                  className="image-rendering-pixelated block h-full w-full"
                 />
                 {showGrid && (
                   <div
@@ -136,43 +176,21 @@ export function ResultCards({
                     }
                   />
                 )}
-              </AspectRatio>
+              </div>
             )}
           </div>
         </CardContent>
       </Card>
 
       <div className="flex items-center gap-1 md:hidden">
-        <Button
+        <ExportButtons
+          handleExportPng={handleExportPng}
+          handleExportPaintFile={handleExportPaintFile}
+          handleReset={handleReset}
+          loading={loading}
           variant="outline"
-          size="sm"
-          onClick={handleExportPaintFile}
-          disabled={loading}
-          className="min-h-9 gap-1 text-xs"
-        >
-          <PaintBucketIcon className="size-3.5" />
-          .paint
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleExportPng}
-          disabled={loading}
-          className="min-h-9 gap-1 text-xs"
-        >
-          <ImageIcon className="size-3.5" />
-          PNG
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleReset}
-          disabled={loading}
-          className="min-h-9 gap-1 text-xs"
-        >
-          <UploadIcon className="size-3.5" />
-          New
-        </Button>
+          labels="short"
+        />
         <div className="ml-auto">
           <Button
             variant={mobileSettingsOpen ? "secondary" : "outline"}

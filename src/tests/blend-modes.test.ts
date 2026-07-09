@@ -279,7 +279,7 @@ describe("applyBlendMode", () => {
     const result = applyBlendMode(AsepriteLayerBlendMode.Hue, 255, 0, 0, opaque, 0, 0, 255, opaque);
     expect(result).toHaveLength(4);
     expect(result[3]).toBe(opaque);
-    // Hue blending via HSL — output differs from simple RGB blend
+    // Hue blending via HSL, output differs from simple RGB blend
     expect(result[0]).toBeGreaterThanOrEqual(0);
     expect(result[0]).toBeLessThanOrEqual(255);
   });

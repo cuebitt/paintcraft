@@ -149,13 +149,13 @@ describe("readPaintFile", () => {
 describe("writePaintFile format validation", () => {
   it("rejects canvas type > 3 for jop-1x format", async () => {
     await expect(writePaintFile(makePaintData(4, 2304), "jop-1x")).rejects.toThrow(
-      "Must be 0–3 for jop-1x",
+      "Must be 0 to 3 for jop-1x",
     );
   });
 
   it("rejects canvas type > 3 for jop-2x format", async () => {
     await expect(writePaintFile(makePaintData(4, 2304), "jop-2x")).rejects.toThrow(
-      "Must be 0–3 for jop-2x",
+      "Must be 0 to 3 for jop-2x",
     );
   });
 

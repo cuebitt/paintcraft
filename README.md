@@ -1,4 +1,4 @@
-# paintcraft 🎨
+# paintcraft
 
 Converts images into `.paint` files for the [Joy of Painting](https://modrinth.com/mod/joy-of-painting) Minecraft mod. Drop in an image, pick a canvas size, tweak the fit and padding, export.
 
@@ -8,31 +8,31 @@ Supports PNG, JPEG, WEBP, GIF, PSD, Aseprite, Pixil, Piskel, SVG, and `.paint` f
 
 ## What it does
 
-**Import & export**
+Import & export
 
 - Loads PNG, JPEG, WEBP, GIF, SVG, PSD, Aseprite, Pixil, and Piskel (`.ase`, `.aseprite`, `.pixil`, `.piskel`)
 - Re-imports `.paint` files for further editing (auto-detects format variant)
 - Exports as `.paint` NBT, PNG, or copies to clipboard
 - Three format variants: `jop-1x` (base), `jop-2x` (glass + side painting), `jop-delta` (Cobblemon Delta),
 
-**Image processing**
+Image processing
 
 - Optional quantization via Median Cut, NeuQuant, or WuQuant (using [image-q](https://github.com/ImgPix/image-q)) with Floyd-Steinberg dithering
-- 1–256 adaptive colors, with support for fixed palette inclusion
+- 1 to 256 adaptive colors, with support for fixed palette inclusion
 - Resize filters: nearest neighbor, box, hamming, lanczos2, lanczos3, or Magic Kernel Sharp 2013 (via [pica](https://github.com/nickytonline/pica)), plus optional unsharp mask
 - Side-by-side original vs. processed comparison
 - Embed original image as WebP inside `.paint` file for re-editing later
 
-**Canvas & layout**
+Canvas & layout
 
 - 10 presets from 16×16 to 64×64, see [Canvas presets](#canvas-presets)
 - Fit modes: contain, fill by width, fill by height
-- Background color picker (full hex, with RGBA for glass mode)
+- Background color picker (hex with RGBA for glass mode)
 - Grid overlay
 - Glass canvas support (jop-2x format) with transparent backgrounds
 - Side painting support (jop-2x format), exports edge pixel data for 3D canvas blocks
 
-**Settings**
+Settings
 
 - 8 accent colors, light/dark/system theme
 - Signed or unsigned painting toggle (controls `generation` and `v` fields for Joy of Painting compatibility)
@@ -40,10 +40,10 @@ Supports PNG, JPEG, WEBP, GIF, PSD, Aseprite, Pixil, Piskel, SVG, and `.paint` f
 - Tooltip toggle (show/hide tooltips globally)
 - Transparency grid toggle
 
-**Other**
+Other
 
 - Undo/redo with 50-state history and a history stepper at the bottom of the settings panel
-- Keyboard shortcuts (Cmd on macOS, Ctrl on Linux/Windows) — see [below](#keyboard-shortcuts)
+- Keyboard shortcuts (⌘ on macOS, Ctrl on Linux/Windows), see [below](#keyboard-shortcuts)
 - Saves your quantization method, fit mode, resize filter, and theme to localStorage
 - Heavy processing runs in Web Workers to keep the UI responsive
 
@@ -109,15 +109,15 @@ Deploys automatically on push to `main` with [GitHub Actions](.github/workflows/
 
 ## Keyboard shortcuts
 
-| Shortcut                                  | Action               |
-| ----------------------------------------- | -------------------- |
-| `Ctrl+Z` / `Cmd+Z`                        | Undo                 |
-| `Ctrl+Shift+Z` / `Cmd+Shift+Z` / `Ctrl+Y` | Redo                 |
-| `G`                                       | Toggle grid overlay  |
-| `Q`                                       | Toggle quantization  |
-| `Ctrl+Shift+E` / `Cmd+Shift+E`            | Export `.paint` file |
-| `Ctrl+Shift+P` / `Cmd+Shift+P`            | Export PNG           |
-| `Ctrl+Shift+C` / `Cmd+Shift+C`            | Copy to clipboard    |
+| Shortcut                                | Action               |
+| --------------------------------------- | -------------------- |
+| `Ctrl+Z` / `⌘+Z`                        | Undo                 |
+| `Ctrl+Shift+Z` / `⌘+Shift+Z` / `Ctrl+Y` | Redo                 |
+| `G`                                     | Toggle grid overlay  |
+| `Q`                                     | Toggle quantization  |
+| `Ctrl+Shift+E` / `⌘+Shift+E`            | Export `.paint` file |
+| `Ctrl+Shift+P` / `⌘+Shift+P`            | Export PNG           |
+| `Ctrl+Shift+C` / `⌘+Shift+C`            | Copy to clipboard    |
 
 ## Canvas presets
 
@@ -142,16 +142,16 @@ paintcraft embeds the original image as a WebP byte array under the `img` key in
 
 ## Libraries
 
-- [Preact](https://github.com/preactjs/preact) + [TypeScript](https://github.com/microsoft/TypeScript) — UI
-- [Zustand](https://github.com/pmndrs/zustand) — state management
-- [zundo](https://github.com/charkour/zundo) — undo/redo middleware for Zustand
-- [Vite-plus](https://github.com/voidzero-dev/vite-plus) — build tool
+- [Preact](https://github.com/preactjs/preact) + [TypeScript](https://github.com/microsoft/TypeScript), UI
+- [Zustand](https://github.com/pmndrs/zustand), state management
+- [zundo](https://github.com/charkour/zundo), undo/redo middleware for Zustand
+- [Vite-plus](https://github.com/voidzero-dev/vite-plus), build tool
 - [Tailwind CSS](https://github.com/tailwindlabs/tailwindcss), [shadcn/ui](https://github.com/shadcn-ui/ui), [lucide-react](https://github.com/lucide-icons/lucide), [react-colorful](https://github.com/omgovich/react-colorful), [@base-ui/react](https://github.com/mui/base-ui)
-- [image-q](https://github.com/ImgPix/image-q) — quantization
-- [pica](https://github.com/nickytonline/pica) — resizing
-- [nbtify](https://github.com/Offroaders123/nbtify) — NBT read/write
-- [@pixelation/aseprite](https://github.com/nickytonline/aseprite-loader), [ag-psd](https://github.com/nickytonline/ag-psd) — file format support
-- [file-saver](https://github.com/eligrey/FileSaver.js) — client-side file downloads
-- [random-word-slugs](https://github.com/Spiderpig86/random-word-slugs) — filename generation
-- [DOMPurify](https://github.com/cure53/DOMPurify) — HTML sanitization
-- [Vitest](https://github.com/vitest-dev/vitest) — tests
+- [image-q](https://github.com/ImgPix/image-q), quantization
+- [pica](https://github.com/nickytonline/pica), resizing
+- [nbtify](https://github.com/Offroaders123/nbtify), NBT read/write
+- [@pixelation/aseprite](https://github.com/nickytonline/aseprite-loader), [ag-psd](https://github.com/nickytonline/ag-psd), file format support
+- [file-saver](https://github.com/eligrey/FileSaver.js), client-side file downloads
+- [random-word-slugs](https://github.com/Spiderpig86/random-word-slugs), filename generation
+- [DOMPurify](https://github.com/cure53/DOMPurify), HTML sanitization
+- [Vitest](https://github.com/vitest-dev/vitest), tests

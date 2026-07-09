@@ -1,6 +1,6 @@
 # .paint file format
 
-An uncompressed NBT binary format. Three variants exist, each based on a different version of the Joy of Painting mod.
+Uncompressed NBT binary format. Three variants exist, each based on a different version of the Joy of Painting mod.
 
 ## jop-1x (xercapaint 1.1.0 base)
 
@@ -14,11 +14,11 @@ The original format. Supports four canvas sizes.
   "pixels":  int[],   // ARGB 0xAARRGGBB, row-major, length = w * h
   "ct":      byte,    // 0=SMALL, 1=LARGE, 2=LONG, 3=TALL
 
-  // Conditional — both present XOR both absent:
+  // Conditional: both present XOR both absent:
   "title":  string,   // max 16 chars (truncated on import)
   "author": string,   // max 16 chars (truncated on import)
 
-  // Conditional — required when title present:
+  // Conditional: required when title present:
   "name":  string,    // UUID regex: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}_\d+$
   "v":     int,       // version, default 1
   "generation": int   // 0=original, 1=copy, 2=copy-of-copy, etc. Incremented by 1 on import if > 0.
@@ -36,8 +36,8 @@ The original format. Supports four canvas sizes.
 
 **Import rules:**
 
-- `title`/`author` XOR constraint — both or neither, else "broken paint file"
-- `ct` 0–3 only; `fromByte` returns `null` for anything else → "broken paint file"
+- `title`/`author` XOR constraint, both or neither, else "broken paint file"
+- `ct` 0 to 3 only; `fromByte` returns `null` for anything else, "broken paint file"
 - `name` validated against UUID regex when signed
 - `generation` incremented by 1 on import if > 0; removed entirely for unsigned paintings
 - No `glass`, `sidePixels`, or `sidesActive` fields
@@ -56,19 +56,19 @@ Adds glass canvas and side painting support. Based on the original 4 canvas type
   "pixels":  int[],   // ARGB 0xAARRGGBB, row-major, length = w * h
   "ct":      byte,    // 0=SMALL, 1=LARGE, 2=LONG, 3=TALL
 
-  // Optional — glass canvas:
+  // Optional: glass canvas:
   "glass":  byte,     // 0 or 1. Default absent/false.
 
-  // Conditional — side painting:
+  // Conditional: side painting:
   "sidePixels":  int[],   // Present if sidesActive. Length = 2w + 2h.
                           // Order: top(w), bottom(w), left(h), right(h).
   "sidesActive": byte,    // 0 or 1. Only present when sidePixels is present.
 
-  // Conditional — both present XOR both absent:
+  // Conditional: both present XOR both absent:
   "title":  string,   // max 16 chars (truncated on import)
   "author": string,   // max 16 chars (truncated on import)
 
-  // Conditional — required when title present:
+  // Conditional: required when title present:
   "name":  string,    // UUID regex: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}_\d+$
   "v":     int,       // version, default 1
   "generation": int   // 0-3. Incremented by 1 on import if > 0 and < 3 (capped at 3).
@@ -91,7 +91,7 @@ Adds glass canvas and side painting support. Based on the original 4 canvas type
 - `generation` increment capped: only increments if `> 0 && < 3` (not just `> 0`)
 - Removes the `tag == null` null check present in 1.1.0 base
 - Imports `glass` via `tag.getBoolean("glass")` and matches it against the held canvas item
-- No `canvasItemFor()` helper — creates items via `new ItemStack(ItemCanvas.canvasItemFor(type, glass))`
+- No `canvasItemFor()` helper, creates items via `new ItemStack(ItemCanvas.canvasItemFor(type, glass))`
 - Canvas type mismatch error includes glass material check ("xercapaint.import.fail.material")
 
 ---
@@ -118,10 +118,10 @@ Same schema as jop-1x, but extends CanvasType from 4 to 10 entries. The NBT form
 **Changes from base:**
 
 - `CanvasType` uses fields (`width`, `height`, `id`) instead of a switch
-- `fromByte` iterates `values()` — supports all 10 types
+- `fromByte` iterates `values()`, supports all 10 types
 - Creative-mode canvas lookup uses `Items.canvasItemFor(type)` instead of a switch with 4 cases
 - Import command requires op level 2 (`requires(source -> source.hasPermissionLevel(2))`)
-- `.paint` file tags are identical to base — no new NBT keys added
+- `.paint` file tags are identical to base, no new NBT keys added
 
 ---
 
@@ -130,7 +130,7 @@ Same schema as jop-1x, but extends CanvasType from 4 to 10 entries. The NBT form
 | Field         | jop-1x | jop-2x | jop-delta |
 | ------------- | ------ | ------ | --------- |
 | `pixels`      | ✓      | ✓      | ✓         |
-| `ct` (range)  | 0–3    | 0–3    | 0–9       |
+| `ct` (range)  | 0 to 3 | 0 to 3 | 0 to 9    |
 | `title`       | ✓      | ✓      | ✓         |
 | `author`      | ✓      | ✓      | ✓         |
 | `name`        | ✓      | ✓      | ✓         |

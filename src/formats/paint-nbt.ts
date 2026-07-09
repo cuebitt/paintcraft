@@ -66,7 +66,9 @@ export async function writePaintFile(
 ): Promise<Uint8Array> {
   const maxCt = MAX_CT_FOR_FORMAT[format];
   if (data.canvasType < 0 || data.canvasType > maxCt) {
-    throw new Error(`Invalid canvas type: ${data.canvasType}. Must be 0–${maxCt} for ${format}.`);
+    throw new Error(
+      `Invalid canvas type: ${data.canvasType}. Must be 0 to ${maxCt} for ${format}.`,
+    );
   }
 
   const expected = PIXEL_COUNTS[data.canvasType];
@@ -144,7 +146,7 @@ export async function readPaintFile(data: ArrayBuffer | Uint8Array): Promise<Pai
     argb & 0xff,
   ]);
 
-  // TODO: format detection based on field presence is fragile — check a format flag if available
+  // TODO: format detection based on field presence is fragile, check a format flag if available
   const hasGlass = "glass" in root;
   const hasSidePixels = "sidePixels" in root;
   const hasSidesActive = "sidesActive" in root;

@@ -34,7 +34,7 @@ export function PopoverPicker({
         <Popover.Positioner sideOffset={8}>
           <Popover.Popup className="w-[200px] rounded-lg border border-border shadow-lg">
             <Picker color={color} onChange={onChange} onChangeEnd={onChangeEnd} />
-            {/* onInput is the Preact equivalent of React's onChange — this input IS controlled */}
+            {/* onInput is the Preact equivalent of React's onChange, this input IS controlled */}
             {/* oxlint-disable-next-line react-doctor/no-uncontrolled-input */}
             <input
               type="text"

@@ -60,9 +60,9 @@ export function ExportSettings({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <FileIcon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Format</span>
+          Format
         </span>
         <Tooltip disabled={!showTooltips}>
           <TooltipTrigger
@@ -96,9 +96,9 @@ export function ExportSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <GlassWaterIcon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Glass Canvas</span>
+          Glass Canvas
         </span>
         <Switch
           id="setting-glass-toggle"
@@ -109,9 +109,9 @@ export function ExportSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <BoxIcon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Paint Sides</span>
+          Paint Sides
         </span>
         <Switch
           id="setting-sides-toggle"
@@ -122,11 +122,9 @@ export function ExportSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <PenIcon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">
-            {signed ? "Signed" : "Unsigned"}
-          </span>
+          {signed ? "Signed" : "Unsigned"}
         </span>
         <Switch
           id="setting-signed-toggle"
@@ -137,9 +135,9 @@ export function ExportSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <PaperclipIcon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Embed Original</span>
+          Embed Original
         </span>
         <Switch
           id="setting-embed-original-toggle"
@@ -150,13 +148,12 @@ export function ExportSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <TypeIcon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Title</span>
+          Title
         </span>
         <Input
           id="setting-painting-title"
-          type="text"
           maxLength={64}
           value={title}
           onChange={(e) => setTitle((e.target as HTMLInputElement).value)}
@@ -167,13 +164,12 @@ export function ExportSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <UserIcon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Author</span>
+          Author
         </span>
         <Input
           id="setting-painting-author"
-          type="text"
           maxLength={64}
           value={author}
           onChange={(e) => setAuthor((e.target as HTMLInputElement).value)}

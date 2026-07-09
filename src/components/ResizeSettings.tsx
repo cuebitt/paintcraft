@@ -48,9 +48,9 @@ export function ResizeSettings({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <ScalingIcon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Resize Filter</span>
+          Resize Filter
         </span>
         <Tooltip disabled={!showTooltips}>
           <TooltipTrigger
@@ -87,9 +87,9 @@ export function ResizeSettings({
         <Tooltip disabled={!showTooltips}>
           <TooltipTrigger
             render={
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-2 text-sm font-medium text-foreground">
                 <WandIcon className="size-4 shrink-0 text-accent" />
-                <span className="text-sm font-medium text-foreground">Sharpen</span>
+                Sharpen
               </span>
             }
           />
@@ -114,9 +114,9 @@ export function ResizeSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <Maximize2Icon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Fit Mode</span>
+          Fit Mode
         </span>
         <Tooltip disabled={!showTooltips}>
           <TooltipTrigger
@@ -150,9 +150,9 @@ export function ResizeSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <RefreshCwIcon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Reprocess</span>
+          Reprocess
         </span>
         <Tooltip disabled={!showTooltips}>
           <TooltipTrigger

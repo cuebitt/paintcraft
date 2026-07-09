@@ -47,10 +47,8 @@ export function EmbedLayout({
               preview={preview}
             />
           ) : (
-            <div className="flex flex-1 flex-col p-4">
-              <div className="mx-auto flex max-h-[80dvh] w-full max-w-2xl flex-1 flex-col">
-                <UploadDropzone onUpload={handleUpload} loading={loading} className="flex-1" />
-              </div>
+            <div className="mx-auto flex max-h-[80dvh] w-full max-w-2xl flex-1 flex-col p-4">
+              <UploadDropzone onUpload={handleUpload} loading={loading} className="flex-1" />
             </div>
           )}
         </div>

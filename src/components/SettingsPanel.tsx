@@ -93,76 +93,74 @@ export function SettingsPanel() {
         <TabsTrigger value="export">Export</TabsTrigger>
       </TabsList>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <TabsContent value="canvas" keepMounted>
-          <CanvasSettings
-            selectedCanvas={selectedCanvas}
-            paintFormat={paintFormat}
-            paddingColorPreview={paddingColorPreview}
-            paddingAlpha={paddingAlpha}
-            glass={glass}
-            showGrid={showGrid}
-            showTransparencyGrid={showTransparencyGrid}
-            showTooltips={showTooltips}
-            loading={loading}
-            setCanvas={setCanvas}
-            setPaddingColorPreview={setPaddingColorPreview}
-            setPaddingColor={setPaddingColor}
-            setShowGrid={setShowGrid}
-            setShowTransparencyGrid={setShowTransparencyGrid}
-          />
-        </TabsContent>
+      <TabsContent value="canvas" keepMounted className="min-h-0 flex-1 overflow-y-auto">
+        <CanvasSettings
+          selectedCanvas={selectedCanvas}
+          paintFormat={paintFormat}
+          paddingColorPreview={paddingColorPreview}
+          paddingAlpha={paddingAlpha}
+          glass={glass}
+          showGrid={showGrid}
+          showTransparencyGrid={showTransparencyGrid}
+          showTooltips={showTooltips}
+          loading={loading}
+          setCanvas={setCanvas}
+          setPaddingColorPreview={setPaddingColorPreview}
+          setPaddingColor={setPaddingColor}
+          setShowGrid={setShowGrid}
+          setShowTransparencyGrid={setShowTransparencyGrid}
+        />
+      </TabsContent>
 
-        <TabsContent value="resize" keepMounted>
-          <ResizeSettings
-            resizeFilter={resizeFilter}
-            resizeSharpenLocal={sharpenLocal}
-            fitMode={fitMode}
-            showTooltips={showTooltips}
-            loading={loading}
-            setResizeFilter={setResizeFilter}
-            handleSharpenChange={onSharpen}
-            setFitMode={setFitMode}
-            onReprocess={reprocess}
-          />
-        </TabsContent>
+      <TabsContent value="resize" keepMounted className="min-h-0 flex-1 overflow-y-auto">
+        <ResizeSettings
+          resizeFilter={resizeFilter}
+          resizeSharpenLocal={sharpenLocal}
+          fitMode={fitMode}
+          showTooltips={showTooltips}
+          loading={loading}
+          setResizeFilter={setResizeFilter}
+          handleSharpenChange={onSharpen}
+          setFitMode={setFitMode}
+          onReprocess={reprocess}
+        />
+      </TabsContent>
 
-        <TabsContent value="colors" keepMounted>
-          <QuantizationSettings
-            quantizationEnabled={quantizationEnabled}
-            quantMethod={quantMethod}
-            colorCountLocal={colorCountLocal}
-            includeFixedPalette={includeFixedPalette}
-            showTooltips={showTooltips}
-            loading={loading}
-            setQuantizationEnabled={setQuantizationEnabled}
-            setQuantMethod={setQuantMethod}
-            handleColorCountChange={onColorCount}
-            setIncludeFixedPalette={setIncludeFixedPalette}
-          />
-        </TabsContent>
+      <TabsContent value="colors" keepMounted className="min-h-0 flex-1 overflow-y-auto">
+        <QuantizationSettings
+          quantizationEnabled={quantizationEnabled}
+          quantMethod={quantMethod}
+          colorCountLocal={colorCountLocal}
+          includeFixedPalette={includeFixedPalette}
+          showTooltips={showTooltips}
+          loading={loading}
+          setQuantizationEnabled={setQuantizationEnabled}
+          setQuantMethod={setQuantMethod}
+          handleColorCountChange={onColorCount}
+          setIncludeFixedPalette={setIncludeFixedPalette}
+        />
+      </TabsContent>
 
-        <TabsContent value="export" keepMounted>
-          <ExportSettings
-            paintFormat={paintFormat}
-            glass={glass}
-            sidesActive={sidesActive}
-            signed={signed}
-            embedOriginalImage={embedOriginalImage}
-            title={title}
-            author={author}
-            showTooltips={showTooltips}
-            loading={loading}
-            setPaintFormat={setPaintFormat}
-            setGlass={setGlass}
-            setSidesActive={setSidesActive}
-            setSigned={setSigned}
-            setEmbedOriginalImage={setEmbedOriginalImage}
-            setTitle={setTitle}
-            setAuthor={setAuthor}
-          />
-        </TabsContent>
-      </div>
+      <TabsContent value="export" keepMounted className="min-h-0 flex-1 overflow-y-auto">
+        <ExportSettings
+          paintFormat={paintFormat}
+          glass={glass}
+          sidesActive={sidesActive}
+          signed={signed}
+          embedOriginalImage={embedOriginalImage}
+          title={title}
+          author={author}
+          showTooltips={showTooltips}
+          loading={loading}
+          setPaintFormat={setPaintFormat}
+          setGlass={setGlass}
+          setSidesActive={setSidesActive}
+          setSigned={setSigned}
+          setEmbedOriginalImage={setEmbedOriginalImage}
+          setTitle={setTitle}
+          setAuthor={setAuthor}
+        />
+      </TabsContent>
 
       <div className="flex shrink-0 items-center justify-center gap-1 border-t border-border px-2 py-2 text-xs text-muted-foreground">
         <Button

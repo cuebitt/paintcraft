@@ -79,7 +79,6 @@ export function UploadDropzone({
       onDrop={handleDrop}
       onClick={() => fileInputRef.current?.click()}
       onKeyDown={handleKeyDown}
-      role="button"
       tabIndex={0}
       aria-label="Upload image"
     >

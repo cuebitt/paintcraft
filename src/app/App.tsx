@@ -246,24 +246,21 @@ function App() {
             </div>
           )}
 
-          <div
-            className={`flex min-h-0 flex-1 flex-col${hasResults ? " max-h-[calc(100vh-12rem)]" : ""}`}
-          >
-            {hasResults ? (
-              <ResultCards
-                handleExportPng={handleExportPng}
-                handleExportPaintFile={handleExportPaintFile}
-                loading={state.loading}
-                handleReset={handleReset}
-                onToggleOriginal={toggleOrig}
-                preview={preview}
-              />
-            ) : (
-              <div className="mx-auto w-full max-w-2xl">
-                <UploadDropzone onUpload={handleUpload} loading={state.loading} />
-              </div>
-            )}
-          </div>
+          {hasResults ? (
+            <ResultCards
+              handleExportPng={handleExportPng}
+              handleExportPaintFile={handleExportPaintFile}
+              loading={state.loading}
+              handleReset={handleReset}
+              onToggleOriginal={toggleOrig}
+              preview={preview}
+              className="max-h-[calc(100vh-12rem)]"
+            />
+          ) : (
+            <div className="mx-auto w-full max-w-2xl">
+              <UploadDropzone onUpload={handleUpload} loading={state.loading} />
+            </div>
+          )}
 
           {hasResults && state.quantizationEnabled && (
             <PalettesSection

@@ -45,9 +45,9 @@ export function QuantizationSettings({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <SparklesIcon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Quantize</span>
+          Quantize
         </span>
         <Switch
           id="setting-quantization-toggle"
@@ -58,9 +58,9 @@ export function QuantizationSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <SparklesIcon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Method</span>
+          Method
         </span>
         <Tooltip disabled={!showTooltips}>
           <TooltipTrigger
@@ -94,9 +94,9 @@ export function QuantizationSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <HashIcon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Color Count</span>
+          Color Count
         </span>
         <Input
           id="setting-adaptive-colors"
@@ -116,9 +116,9 @@ export function QuantizationSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <SwatchBookIcon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Fixed Palette</span>
+          Fixed Palette
         </span>
         <Switch
           id="setting-fixed-palette-toggle"

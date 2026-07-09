@@ -37,7 +37,6 @@ export function PopoverPicker({
             {/* onInput is the Preact equivalent of React's onChange, this input IS controlled */}
             {/* oxlint-disable-next-line react-doctor/no-uncontrolled-input */}
             <input
-              type="text"
               value={color}
               aria-label="Hex color"
               onInput={(e) => {

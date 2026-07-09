@@ -59,9 +59,9 @@ export function CanvasSettings({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <Grid3x3Icon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Canvas Size</span>
+          Canvas Size
         </span>
         <Tooltip disabled={!showTooltips}>
           <TooltipTrigger
@@ -98,36 +98,34 @@ export function CanvasSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <PaintbrushIcon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Padding</span>
+          Padding
         </span>
         <Tooltip disabled={!showTooltips}>
           <TooltipTrigger
             render={
-              <div className="flex items-center gap-2">
-                <PopoverPicker
-                  color={hexColor}
-                  alpha={glass}
-                  showTransparencyGrid={showTransparencyGrid}
-                  onChange={(hex) => {
-                    if (glass) {
-                      const { color, alpha } = hexToRgba(hex);
-                      setPaddingColorPreview(color, alpha);
-                    } else {
-                      setPaddingColorPreview(hexToRgb(hex), 1);
-                    }
-                  }}
-                  onChangeEnd={(hex) => {
-                    if (glass) {
-                      const { color, alpha } = hexToRgba(hex);
-                      setPaddingColor(color, alpha);
-                    } else {
-                      setPaddingColor(hexToRgb(hex), 1);
-                    }
-                  }}
-                />
-              </div>
+              <PopoverPicker
+                color={hexColor}
+                alpha={glass}
+                showTransparencyGrid={showTransparencyGrid}
+                onChange={(hex) => {
+                  if (glass) {
+                    const { color, alpha } = hexToRgba(hex);
+                    setPaddingColorPreview(color, alpha);
+                  } else {
+                    setPaddingColorPreview(hexToRgb(hex), 1);
+                  }
+                }}
+                onChangeEnd={(hex) => {
+                  if (glass) {
+                    const { color, alpha } = hexToRgba(hex);
+                    setPaddingColor(color, alpha);
+                  } else {
+                    setPaddingColor(hexToRgb(hex), 1);
+                  }
+                }}
+              />
             }
           />
           <TooltipContent>Set the background color for padding areas</TooltipContent>
@@ -135,9 +133,9 @@ export function CanvasSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <Grid3x3Icon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Cell Grid</span>
+          Cell Grid
         </span>
         <Switch
           id="setting-grid-toggle"
@@ -146,9 +144,9 @@ export function CanvasSettings({
         />
       </div>
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
           <LayersIcon className="size-4 shrink-0 text-accent" />
-          <span className="text-sm font-medium text-foreground">Transparency Grid</span>
+          Transparency Grid
         </span>
         <Switch
           id="setting-transparency-toggle"

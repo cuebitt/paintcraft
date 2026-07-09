@@ -19,6 +19,7 @@ type ResultCardsProps = {
   handleReset: () => void;
   onToggleOriginal: () => void;
   preview: PreviewOptions;
+  className?: string;
 };
 
 export function ResultCards({
@@ -28,11 +29,12 @@ export function ResultCards({
   handleReset,
   onToggleOriginal,
   preview,
+  className,
 }: ResultCardsProps) {
   const { showOriginal, showTransparencyGrid, showGrid, activeUrl, cellsX, cellsY } = preview;
 
   return (
-    <div className="flex min-h-0 flex-1 gap-2">
+    <div className={`flex min-h-0 flex-1 gap-2${className ? ` ${className}` : ""}`}>
       <Card size="sm" className="w-80 shrink-0 self-stretch overflow-hidden">
         <CardHeader className="flex flex-row flex-wrap items-center gap-1">
           <Button

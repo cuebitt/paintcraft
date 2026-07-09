@@ -63,6 +63,7 @@ export function SettingsPanel() {
     setGlass,
     setSidesActive,
     setShowTransparencyGrid,
+    reprocess,
   } = useStoreSnapshot();
 
   const { undo, redo, pastStates, futureStates } = useTemporalSnapshot();
@@ -122,6 +123,7 @@ export function SettingsPanel() {
             setResizeFilter={setResizeFilter}
             handleSharpenChange={onSharpen}
             setFitMode={setFitMode}
+            onReprocess={reprocess}
           />
         </TabsContent>
 

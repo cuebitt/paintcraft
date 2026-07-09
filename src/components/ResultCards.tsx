@@ -80,10 +80,11 @@ export function ResultCards({
         </CardHeader>
         <CardContent className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden">
           {activeUrl && (
-            <div className="relative h-full w-full">
+            <div className="relative h-full w-full" style={{ containerType: "size" }}>
               <div
-                className="absolute top-1/2 left-1/2 max-h-full w-full"
+                className="absolute top-1/2 left-1/2"
                 style={{
+                  width: `min(100cqi, calc(100cqb * ${cellsX} / ${cellsY}))`,
                   aspectRatio: `${cellsX} / ${cellsY}`,
                   transform: "translate(-50%, -50%)",
                 }}

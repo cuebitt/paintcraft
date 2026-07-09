@@ -183,6 +183,7 @@ function App() {
     state.includeFixedPalette,
     state.resizeFilter,
     state.unsharpAmount,
+    state.reprocessCount,
     processImage,
     workers.originalImageRef,
     startTimer,

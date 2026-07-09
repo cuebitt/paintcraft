@@ -7,10 +7,11 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 import type { ResizeFilter } from "@/core/preprocess";
 import type { ImageFitMode } from "@/types";
 import { FIT_MODES } from "@/types";
-import { ScalingIcon, WandIcon, Maximize2Icon } from "lucide-react";
+import { ScalingIcon, WandIcon, Maximize2Icon, RefreshCwIcon } from "lucide-react";
 
 const RESIZE_FILTERS: { value: ResizeFilter; label: string }[] = [
   { value: "box", label: "Box" },
@@ -30,6 +31,7 @@ type ResizeSettingsProps = {
   setResizeFilter: (filter: ResizeFilter) => void;
   handleSharpenChange: (val: number) => void;
   setFitMode: (mode: ImageFitMode) => void;
+  onReprocess: () => void;
 };
 
 export function ResizeSettings({
@@ -41,6 +43,7 @@ export function ResizeSettings({
   setResizeFilter,
   handleSharpenChange,
   setFitMode,
+  onReprocess,
 }: ResizeSettingsProps) {
   return (
     <div className="flex flex-col gap-3">
@@ -142,6 +145,26 @@ export function ResizeSettings({
           />
           <TooltipContent side="bottom" sideOffset={8}>
             How the image fits within the canvas dimensions
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      <div className="flex min-h-9 items-center justify-between gap-2">
+        <span className="flex items-center gap-2">
+          <RefreshCwIcon className="size-4 shrink-0 text-accent" />
+          <span className="text-sm font-medium text-foreground">Reprocess</span>
+        </span>
+        <Tooltip disabled={!showTooltips}>
+          <TooltipTrigger
+            render={
+              <Button variant="outline" size="sm" disabled={loading} onClick={onReprocess}>
+                <RefreshCwIcon className="size-3.5" />
+                Refresh
+              </Button>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={8}>
+            Re-runs image processing. This action cannot be undone.
           </TooltipContent>
         </Tooltip>
       </div>

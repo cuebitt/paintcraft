@@ -36,6 +36,7 @@ export interface AppState {
   sidesActive: boolean;
   showTransparencyGrid: boolean;
   glassPadding: boolean;
+  reprocessCount: number;
 }
 
 const initialState: AppState = {
@@ -66,6 +67,7 @@ const initialState: AppState = {
   sidesActive: false,
   showTransparencyGrid: true,
   glassPadding: false,
+  reprocessCount: 0,
 };
 
 interface StoreActions {
@@ -104,6 +106,7 @@ interface StoreActions {
   setPaintFormat: (format: PaintFormat) => void;
   setGlass: (glass: boolean) => void;
   setSidesActive: (active: boolean) => void;
+  reprocess: () => void;
   reset: () => void;
 }
 
@@ -205,6 +208,7 @@ export const useAppStore = create<AppState & StoreActions>()(
           });
         },
         setSidesActive: (active) => set({ sidesActive: active }),
+        reprocess: () => set((s) => ({ reprocessCount: s.reprocessCount + 1 })),
         reset: () => set(initialState),
       }),
       {
@@ -220,6 +224,7 @@ export const useAppStore = create<AppState & StoreActions>()(
             sidesActive: _sides,
             showTransparencyGrid: _transparency,
             paddingColorPreview: _preview,
+            reprocessCount: _reprocessCount,
             ...tracked
           } = state;
           return tracked;

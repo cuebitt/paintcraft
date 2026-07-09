@@ -228,6 +228,8 @@ export const useAppStore = create<AppState & StoreActions>()(
           const aKeys = Object.keys(a) as (keyof typeof a)[];
           if (aKeys.length !== Object.keys(b).length) return false;
           for (const key of aKeys) {
+            if (key === "preprocessedUrl" || key === "quantizedUrl" || key === "adaptivePalette")
+              continue;
             if (a[key] !== b[key]) return false;
           }
           return true;

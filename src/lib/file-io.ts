@@ -86,6 +86,7 @@ export function importPaintFile(file: File, workers: ImageProcessorWorkers) {
         glass: painting.glass ?? false,
         sidesActive: painting.sidesActive ?? false,
       });
+      useAppStore.temporal.getState().clear();
     } catch (err) {
       dispatchError(err, `Failed to import ${file.name}`);
     }

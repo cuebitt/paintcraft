@@ -28,6 +28,7 @@ export interface ImageProcessorWorkers {
     processedData: ImageData;
     adaptivePalette?: readonly RGB[];
   } | null>;
+  clearTemporalOnNextResult: RefObject<boolean>;
   flushPendingResult: () => void;
 }
 
@@ -64,6 +65,7 @@ export function useImageProcessor(processImage: ProcessImageFn): ImageProcessorW
     adaptivePalette?: readonly RGB[];
   } | null>(null);
   const displayDataUrlRef = useRef<string>("");
+  const clearTemporalOnNextResult = useRef(false);
   const flushPendingResultRef = useRef<(() => void) | null>(null);
   const processImageRef = useRef(processImage);
   processImageRef.current = processImage;
@@ -123,6 +125,11 @@ export function useImageProcessor(processImage: ProcessImageFn): ImageProcessorW
             URL.createObjectURL(blob),
             pendingResult.adaptivePalette ?? [],
           );
+        if (clearTemporalOnNextResult.current) {
+          useAppStore.temporal.getState().clear();
+          useAppStore.temporal.getState().resume();
+          clearTemporalOnNextResult.current = false;
+        }
       } catch (err) {
         dispatchError(err, "Failed to finalize image result");
       }
@@ -199,6 +206,7 @@ export function useImageProcessor(processImage: ProcessImageFn): ImageProcessorW
       quantizedDataRef,
       pendingProcessRef,
       pendingResultRef,
+      clearTemporalOnNextResult,
       flushPendingResult,
     }),
     [flushPendingResult],

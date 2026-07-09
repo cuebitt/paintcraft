@@ -61,17 +61,23 @@ export function useAppCallbacks(processImage: ProcessImageFn, workers: ImageProc
 
   const handleUpload = useCallback(
     (file: File) => {
+      useAppStore.temporal.getState().clear();
+
       if (file.name.endsWith(".paint")) {
         handleImportPaintFile(file);
         return;
       }
       for (const [ext, handler] of Object.entries(IMPORT_HANDLERS)) {
         if (file.name.endsWith(ext)) {
+          useAppStore.temporal.getState().pause();
+          workersRef.current.clearTemporalOnNextResult.current = true;
           readIntoWorker(file, handler.type, handler.extract, handler.text);
           return;
         }
       }
 
+      useAppStore.temporal.getState().pause();
+      workersRef.current.clearTemporalOnNextResult.current = true;
       useAppStore.getState().setLoading(true);
       const reader = new FileReader();
       reader.onload = () => {

@@ -1,3 +1,5 @@
+import { saveAs } from "file-saver";
+import { generateSlug } from "random-word-slugs";
 import type { ImageProcessorWorkers } from "@/hooks/useImageProcessor";
 import { useAppStore } from "@/app/store";
 import { CANVAS_TYPES } from "@/types";
@@ -12,25 +14,6 @@ import { imageDataToBlob } from "@/lib/utils";
 import { dispatchError } from "@/lib/helpers";
 
 const NBT_CT_TO_CANVAS_INDEX = [0, 3, 1, 2] as const;
-
-function generateShortId(): string {
-  const bytes = new Uint8Array(6);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes, (b) => b.toString(36).padStart(2, "0"))
-    .join("")
-    .slice(0, 8);
-}
-
-function downloadBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
 
 function sanitizeForFilename(s: string): string {
   return s
@@ -92,9 +75,6 @@ export function importPaintFile(file: File, workers: ImageProcessorWorkers) {
       const quantizedBlob = await imageDataToBlob(imageData);
       const quantizedUrl = URL.createObjectURL(quantizedBlob);
 
-      const prevOriginal = useAppStore.getState().originalUrl;
-      const prevQuantized = useAppStore.getState().quantizedUrl;
-
       useAppStore.getState().importPaint({
         canvas: canvasType,
         title: painting.title,
@@ -106,9 +86,6 @@ export function importPaintFile(file: File, workers: ImageProcessorWorkers) {
         glass: painting.glass ?? false,
         sidesActive: painting.sidesActive ?? false,
       });
-
-      if (prevOriginal) URL.revokeObjectURL(prevOriginal);
-      if (prevQuantized) URL.revokeObjectURL(prevQuantized);
     } catch (err) {
       dispatchError(err, `Failed to import ${file.name}`);
     }
@@ -194,7 +171,7 @@ export async function exportPaintFile(
   }
 
   const timestamp = Date.now().toString(36);
-  const name = `${crypto.randomUUID()}_${timestamp}`;
+  const name = `${generateSlug(4)}_${timestamp}`;
   const canvasTypeIndex = getCanvasTypeIndex(state.selectedCanvas);
 
   const hasAuthorAndTitle = state.author !== "" && state.title !== "";
@@ -221,11 +198,11 @@ export async function exportPaintFile(
     const safeTitle = sanitizeForFilename(state.title);
     filename = `${safeAuthor}_${safeTitle}.paint`;
   } else {
-    filename = `${generateShortId()}.paint`;
+    filename = `${generateSlug(4)}.paint`;
   }
 
   const blob = new Blob([paintBuffer as BlobPart], { type: "application/octet-stream" });
-  downloadBlob(blob, filename);
+  saveAs(blob, filename);
 }
 
 // export function exportPngOld(workers: ImageProcessorWorkers): void {
@@ -253,7 +230,7 @@ export function exportPng(workers: ImageProcessorWorkers): void {
       return;
     }
     const timestamp = Date.now().toString(36);
-    const name = `${crypto.randomUUID()}_${timestamp}`;
-    downloadBlob(blob, `painting_${name}.png`);
+    const name = `${generateSlug(4)}_${timestamp}`;
+    saveAs(blob, `painting_${name}.png`);
   }, "image/png");
 }

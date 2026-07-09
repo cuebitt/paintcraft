@@ -1,11 +1,12 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { temporal } from "zundo";
 import type { QuantMethod } from "@/core/quantize";
 import type { CanvasType, ImageFitMode, PaintFormat } from "@/types";
 import type { RGB } from "@/core/palette";
 import type { ResizeFilter } from "@/core/preprocess";
 import { DEFAULT_PADDING_COLOR } from "@/core/preprocess";
 import { CANVAS_TYPES, findClosestCanvas } from "@/types";
-import { loadPreferences } from "@/hooks/preferences";
 
 export interface AppState {
   originalUrl: string | null;
@@ -67,29 +68,7 @@ const initialState: AppState = {
   glassPadding: false,
 };
 
-const MAX_HISTORY = 50;
-
-const UI_ONLY_ACTIONS = new Set<string>([
-  "setShowGrid",
-  "setTitle",
-  "setAuthor",
-  "setSigned",
-  "setEmbedOriginalImage",
-  "setSidesActive",
-  "setShowTransparencyGrid",
-  "setPaddingColorPreview",
-  "setLoading",
-  "setError",
-]);
-
-export type Snapshot = AppState;
-
 interface StoreActions {
-  _set: (partial: Partial<AppState>, actionName?: string) => void;
-  _restore: (snap: Snapshot) => void;
-  undo: () => void;
-  redo: () => void;
-
   setOriginal: (url: string) => void;
   setResult: (preprocessed: string, processed: string, adaptive: readonly RGB[]) => void;
   importPaint: (args: {
@@ -128,169 +107,166 @@ interface StoreActions {
   reset: () => void;
 }
 
-type StoreState = {
-  past: Snapshot[];
-  future: Snapshot[];
-} & Snapshot &
-  StoreActions;
+const VALID_QUANT_METHODS = new Set<string>(["median-cut", "neuquant", "wuquant"]);
+const VALID_FIT_MODES = new Set<string>(["contain", "fill", "width", "height"]);
+const VALID_RESIZE_FILTERS = new Set<string>([
+  "nearest",
+  "box",
+  "hamming",
+  "lanczos2",
+  "lanczos3",
+  "mks2013",
+]);
+const VALID_PAINT_FORMATS = new Set<string>(["jop-1x", "jop-delta", "jop-2x"]);
 
-function snapshot(s: StoreState): Snapshot {
-  const { past: _, future: __, _set: ___, _restore: ____, undo: _____, redo: ______, ...rest } = s;
-  return rest as Snapshot;
-}
+export const useAppStore = create<AppState & StoreActions>()(
+  persist(
+    temporal(
+      (set, get) => ({
+        ...initialState,
 
-export const useAppStore = create<StoreState>()((set, get) => ({
-  ...initialState,
-  past: [],
-  future: [],
-
-  _set: (partial, actionName) => {
-    const s = get() as StoreState;
-    if (actionName && UI_ONLY_ACTIONS.has(actionName)) {
-      set(partial);
-    } else {
-      const snap = snapshot(s);
-      const past = s.past.length >= MAX_HISTORY ? s.past.slice(1) : s.past;
-      set({ ...partial, past: [...past, snap], future: [] });
-    }
-  },
-
-  _restore: (snap) => set(snap),
-
-  undo: () => {
-    const s = get() as StoreState;
-    if (s.past.length === 0) return;
-    const previous = s.past[s.past.length - 1]!;
-    set({
-      ...previous,
-      past: s.past.slice(0, -1),
-      future: [snapshot(s), ...s.future],
-    });
-  },
-
-  redo: () => {
-    const s = get() as StoreState;
-    if (s.future.length === 0) return;
-    const next = s.future[0]!;
-    set({
-      ...next,
-      past: [...s.past, snapshot(s)],
-      future: s.future.slice(1),
-    });
-  },
-
-  setOriginal: (url) => get()._set({ originalUrl: url, error: null }, "setOriginal"),
-  setResult: (preprocessed, processed, adaptive) =>
-    get()._set(
+        setOriginal: (url) => set({ originalUrl: url, error: null }),
+        setResult: (preprocessed, processed, adaptive) =>
+          set({
+            preprocessedUrl: preprocessed,
+            quantizedUrl: processed,
+            adaptivePalette: adaptive,
+            loading: false,
+          }),
+        importPaint: ({
+          canvas,
+          title,
+          author,
+          signed,
+          preprocessed,
+          processed,
+          format,
+          glass,
+          sidesActive,
+        }) => {
+          const glassPadding = glass && format === "jop-2x";
+          set({
+            selectedCanvas: canvas,
+            title,
+            author,
+            signed,
+            preprocessedUrl: preprocessed,
+            quantizedUrl: processed,
+            originalUrl: preprocessed,
+            loading: false,
+            paintFormat: format,
+            glass,
+            sidesActive,
+            glassPadding,
+          });
+        },
+        setLoading: (loading) => set({ loading }),
+        setError: (error) => set({ error, loading: false }),
+        setCanvas: (canvas) => set({ selectedCanvas: canvas }),
+        setShowGrid: (show) => set({ showGrid: show }),
+        setQuantMethod: (method) => set({ quantMethod: method }),
+        setFitMode: (mode) => set({ fitMode: mode }),
+        setPaddingColor: (color, alpha) =>
+          set({
+            paddingColor: color,
+            paddingColorPreview: color,
+            ...(alpha !== undefined ? { paddingAlpha: alpha } : {}),
+          }),
+        setPaddingColorPreview: (color, alpha) =>
+          set({
+            paddingColorPreview: color,
+            ...(alpha !== undefined ? { paddingAlpha: alpha } : {}),
+          }),
+        setQuantizationEnabled: (enabled) => set({ quantizationEnabled: enabled }),
+        setAdaptiveColorCount: (count) => set({ adaptiveColorCount: count }),
+        setIncludeFixedPalette: (include) => set({ includeFixedPalette: include }),
+        setResizeFilter: (filter) => set({ resizeFilter: filter }),
+        setUnsharpAmount: (amount) => set({ unsharpAmount: amount }),
+        setPaddingAlpha: (alpha) => set({ paddingAlpha: alpha }),
+        setTitle: (title) => set({ title }),
+        setAuthor: (author) => set({ author }),
+        setSigned: (signed) => set({ signed }),
+        setEmbedOriginalImage: (embed) => set({ embedOriginalImage: embed }),
+        setShowTransparencyGrid: (show) => set({ showTransparencyGrid: show }),
+        setPaintFormat: (format) => {
+          const state = get();
+          set({
+            paintFormat: format,
+            selectedCanvas: findClosestCanvas(state.selectedCanvas, format),
+            glassPadding: state.glass && format === "jop-2x",
+          });
+        },
+        setGlass: (glass) => {
+          const state = get();
+          set({
+            glass,
+            glassPadding: glass && state.paintFormat === "jop-2x",
+            paddingAlpha: glass ? 0 : 1,
+          });
+        },
+        setSidesActive: (active) => set({ sidesActive: active }),
+        reset: () => set(initialState),
+      }),
       {
-        preprocessedUrl: preprocessed,
-        quantizedUrl: processed,
-        adaptivePalette: adaptive,
-        loading: false,
+        partialize: (state) => {
+          const {
+            loading: _loading,
+            error: _error,
+            showGrid: _showGrid,
+            title: _title,
+            author: _author,
+            signed: _signed,
+            embedOriginalImage: _embed,
+            sidesActive: _sides,
+            showTransparencyGrid: _transparency,
+            paddingColorPreview: _preview,
+            ...tracked
+          } = state;
+          return tracked;
+        },
+        equality: (a, b) => {
+          const aKeys = Object.keys(a) as (keyof typeof a)[];
+          if (aKeys.length !== Object.keys(b).length) return false;
+          for (const key of aKeys) {
+            if (a[key] !== b[key]) return false;
+          }
+          return true;
+        },
+        limit: 50,
       },
-      "setResult",
     ),
-  importPaint: ({
-    canvas,
-    title,
-    author,
-    signed,
-    preprocessed,
-    processed,
-    format,
-    glass,
-    sidesActive,
-  }) => {
-    const glassPadding = glass && format === "jop-2x";
-    get()._set(
-      {
-        selectedCanvas: canvas,
-        title,
-        author,
-        signed,
-        preprocessedUrl: preprocessed,
-        quantizedUrl: processed,
-        originalUrl: preprocessed,
-        loading: false,
-        paintFormat: format,
-        glass,
-        sidesActive,
-        glassPadding,
+    {
+      name: "paintcraft-preferences",
+      partialize: (state) => ({
+        quantMethod: state.quantMethod,
+        fitMode: state.fitMode,
+        resizeFilter: state.resizeFilter,
+        paintFormat: state.paintFormat,
+      }),
+      merge: (persisted, current) => {
+        const p = persisted as Record<string, unknown>;
+        return {
+          ...current,
+          ...(typeof p.quantMethod === "string" &&
+          VALID_QUANT_METHODS.has(p.quantMethod as QuantMethod)
+            ? { quantMethod: p.quantMethod as QuantMethod }
+            : {}),
+          ...(typeof p.fitMode === "string" && VALID_FIT_MODES.has(p.fitMode as ImageFitMode)
+            ? { fitMode: p.fitMode as ImageFitMode }
+            : {}),
+          ...(typeof p.resizeFilter === "string" &&
+          VALID_RESIZE_FILTERS.has(p.resizeFilter as ResizeFilter)
+            ? { resizeFilter: p.resizeFilter as ResizeFilter }
+            : {}),
+          ...(typeof p.paintFormat === "string" &&
+          VALID_PAINT_FORMATS.has(p.paintFormat as PaintFormat)
+            ? { paintFormat: p.paintFormat as PaintFormat }
+            : {}),
+        };
       },
-      "importPaint",
-    );
-  },
-  setLoading: (loading) => get()._set({ loading }, "setLoading"),
-  setError: (error) => get()._set({ error, loading: false }, "setError"),
-  // these are all the same pattern — could probably batch them
-  setCanvas: (canvas) => get()._set({ selectedCanvas: canvas }, "setCanvas"),
-  setShowGrid: (show) => get()._set({ showGrid: show }, "setShowGrid"),
-  setQuantMethod: (method) => get()._set({ quantMethod: method }, "setQuantMethod"),
-  setFitMode: (mode) => get()._set({ fitMode: mode }, "setFitMode"),
-  setPaddingColor: (color, alpha) =>
-    get()._set(
-      {
-        paddingColor: color,
-        paddingColorPreview: color,
-        ...(alpha !== undefined ? { paddingAlpha: alpha } : {}),
-      },
-      "setPaddingColor",
-    ),
-  setPaddingColorPreview: (color, alpha) =>
-    get()._set(
-      { paddingColorPreview: color, ...(alpha !== undefined ? { paddingAlpha: alpha } : {}) },
-      "setPaddingColorPreview",
-    ),
-  setQuantizationEnabled: (enabled) =>
-    get()._set({ quantizationEnabled: enabled }, "setQuantizationEnabled"),
-  setAdaptiveColorCount: (count) =>
-    get()._set({ adaptiveColorCount: count }, "setAdaptiveColorCount"),
-  setIncludeFixedPalette: (include) =>
-    get()._set({ includeFixedPalette: include }, "setIncludeFixedPalette"),
-  setResizeFilter: (filter) => get()._set({ resizeFilter: filter }, "setResizeFilter"),
-  setUnsharpAmount: (amount) => get()._set({ unsharpAmount: amount }, "setUnsharpAmount"),
-  setPaddingAlpha: (alpha) => get()._set({ paddingAlpha: alpha }, "setPaddingAlpha"),
-  setTitle: (title) => get()._set({ title }, "setTitle"),
-  setAuthor: (author) => get()._set({ author }, "setAuthor"),
-  setSigned: (signed) => get()._set({ signed }, "setSigned"),
-  setEmbedOriginalImage: (embed) =>
-    get()._set({ embedOriginalImage: embed }, "setEmbedOriginalImage"),
-  setShowTransparencyGrid: (show) =>
-    get()._set({ showTransparencyGrid: show }, "setShowTransparencyGrid"),
-  setPaintFormat: (format) => {
-    const s = get() as StoreState;
-    get()._set(
-      {
-        paintFormat: format,
-        selectedCanvas: findClosestCanvas(s.selectedCanvas, format),
-        glassPadding: s.glass && format === "jop-2x",
-      },
-      "setPaintFormat",
-    );
-  },
-  setGlass: (glass) => {
-    const s = get() as StoreState;
-    get()._set(
-      {
-        glass,
-        glassPadding: glass && s.paintFormat === "jop-2x",
-        paddingAlpha: glass ? 0 : 1,
-      },
-      "setGlass",
-    );
-  },
-  setSidesActive: (active) => get()._set({ sidesActive: active }, "setSidesActive"),
-  reset: () => {
-    set({ ...initialState, past: [], future: [] });
-  },
-}));
-
-export function restorePreferencesFromStorage() {
-  const prefs = loadPreferences();
-  if (Object.keys(prefs).length > 0) {
-    useAppStore.getState()._set(prefs);
-  }
-}
+    },
+  ),
+);
 
 export function getProcessImageArgs(s: AppState) {
   return [

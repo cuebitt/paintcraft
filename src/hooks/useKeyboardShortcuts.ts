@@ -15,14 +15,15 @@ export function useKeyboardShortcuts(shortcuts: ShortcutMap) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const parts = [];
-      if (e.ctrlKey || e.metaKey) parts.push("ctrl");
+      if (e.metaKey) parts.push("cmd");
+      if (e.ctrlKey) parts.push("ctrl");
       if (e.shiftKey) parts.push("shift");
       if (e.altKey) parts.push("alt");
       parts.push(e.key.toLowerCase());
       const combo = parts.join("+");
 
       if (shortcutsRef.current[combo]) {
-        const hasModifier = e.ctrlKey || e.metaKey || e.altKey;
+        const hasModifier = e.metaKey || e.ctrlKey || e.altKey;
         if (!hasModifier && isInputElement(e.target)) return;
         e.preventDefault();
         shortcutsRef.current[combo]();

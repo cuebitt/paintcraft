@@ -8,17 +8,16 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useImageProcessor, type ProcessImageFn } from "@/hooks/useImageProcessor";
 import { useAppCallbacks } from "@/hooks/useAppCallbacks";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
 import { useClipboard } from "@/hooks/useClipboard";
 import { resolveImageParam } from "@/hooks/useEmbedMode";
 import { preprocessImageForCanvas } from "@/core/preprocess";
-import { useAppStore, getProcessImageArgs, restorePreferencesFromStorage } from "@/app/store";
+import { useAppStore, getProcessImageArgs } from "@/app/store";
 import { dispatchError } from "@/lib/helpers";
 
 function App() {
   const state = useAppStore();
-  const { undo, redo } = state;
+  const { undo, redo } = useAppStore.temporal.getState();
   const [showOriginal, setShowOriginal] = useState(false);
 
   const isEmbedded =
@@ -27,22 +26,15 @@ function App() {
       window.location.pathname.includes("embed") ||
       new URLSearchParams(window.location.search).has("embed"));
 
-  useEffect(() => {
-    if (!isEmbedded) {
-      restorePreferencesFromStorage();
-    }
-  }, [isEmbedded]);
-  useLocalStorage("dark", isEmbedded);
-
   const { startTimer, endTimer } = usePerformanceMonitor();
 
-  const toggleGrid = useCallback(() => {
+  const toggleGrid = () => {
     useAppStore.getState().setShowGrid(!useAppStore.getState().showGrid);
-  }, []);
+  };
 
-  const toggleQuantize = useCallback(() => {
+  const toggleQuantize = () => {
     useAppStore.getState().setQuantizationEnabled(!useAppStore.getState().quantizationEnabled);
-  }, []);
+  };
 
   const processImage = useCallback<ProcessImageFn>(
     async (
@@ -112,7 +104,7 @@ function App() {
           workers.flushPendingResult();
         }
       } catch (err) {
-        dispatchError(err, "Failed to process image");
+        dispatchError(err, "processing failed");
       } finally {
         endTimer("process-image");
       }
@@ -132,13 +124,18 @@ function App() {
   const handleCopyToClipboard = useClipboard(workers, startTimer, endTimer);
 
   useKeyboardShortcuts({
+    "cmd+z": undo,
     "ctrl+z": undo,
+    "cmd+shift+z": redo,
     "ctrl+shift+z": redo,
     "ctrl+y": redo,
     g: toggleGrid,
     q: toggleQuantize,
+    "cmd+shift+e": handleExportPaintFile,
     "ctrl+shift+e": handleExportPaintFile,
+    "cmd+shift+p": handleExportPng,
     "ctrl+shift+p": handleExportPng,
+    "cmd+shift+c": handleCopyToClipboard,
     "ctrl+shift+c": handleCopyToClipboard,
   });
 
@@ -191,15 +188,12 @@ function App() {
     startTimer,
   ]);
 
-  const hasResults = useMemo(
-    () => !!(state.originalUrl && state.preprocessedUrl && state.quantizedUrl),
-    [state.originalUrl, state.preprocessedUrl, state.quantizedUrl],
-  );
+  const hasResults = !!(state.originalUrl && state.preprocessedUrl && state.quantizedUrl);
 
   const activeUrl = showOriginal ? state.originalUrl : state.quantizedUrl;
 
-  const handleReset = useCallback(() => useAppStore.getState().reset(), []);
-  const onToggleOriginal = useCallback(() => setShowOriginal((p) => !p), []);
+  const handleReset = () => useAppStore.getState().reset();
+  const toggleOrig = () => setShowOriginal((p) => !p);
 
   const preview = useMemo(
     () => ({
@@ -230,7 +224,7 @@ function App() {
         handleExportPng={handleExportPng}
         handleExportPaintFile={handleExportPaintFile}
         handleReset={handleReset}
-        onToggleOriginal={onToggleOriginal}
+        onToggleOriginal={toggleOrig}
         preview={preview}
       />
     );
@@ -260,7 +254,7 @@ function App() {
                 handleExportPaintFile={handleExportPaintFile}
                 loading={state.loading}
                 handleReset={handleReset}
-                onToggleOriginal={onToggleOriginal}
+                onToggleOriginal={toggleOrig}
                 preview={preview}
               />
             ) : (

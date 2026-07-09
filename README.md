@@ -42,8 +42,8 @@ Supports PNG, JPEG, WEBP, GIF, PSD, Aseprite, Pixil, Piskel, SVG, and `.paint` f
 
 **Other**
 
-- Undo/redo with 50-state history
-- Keyboard shortcuts — see [below](#keyboard-shortcuts)
+- Undo/redo with 50-state history and a history stepper at the bottom of the settings panel
+- Keyboard shortcuts (Cmd on macOS, Ctrl on Linux/Windows) — see [below](#keyboard-shortcuts)
 - Saves your quantization method, fit mode, resize filter, and theme to localStorage
 - Heavy processing runs in Web Workers to keep the UI responsive
 
@@ -109,15 +109,15 @@ Deploys automatically on push to `main` with [GitHub Actions](.github/workflows/
 
 ## Keyboard shortcuts
 
-| Shortcut                  | Action               |
-| ------------------------- | -------------------- |
-| `Ctrl+Z`                  | Undo                 |
-| `Ctrl+Shift+Z` / `Ctrl+Y` | Redo                 |
-| `G`                       | Toggle grid overlay  |
-| `Q`                       | Toggle quantization  |
-| `Ctrl+Shift+E`            | Export `.paint` file |
-| `Ctrl+Shift+P`            | Export PNG           |
-| `Ctrl+Shift+C`            | Copy to clipboard    |
+| Shortcut                                  | Action               |
+| ----------------------------------------- | -------------------- |
+| `Ctrl+Z` / `Cmd+Z`                        | Undo                 |
+| `Ctrl+Shift+Z` / `Cmd+Shift+Z` / `Ctrl+Y` | Redo                 |
+| `G`                                       | Toggle grid overlay  |
+| `Q`                                       | Toggle quantization  |
+| `Ctrl+Shift+E` / `Cmd+Shift+E`            | Export `.paint` file |
+| `Ctrl+Shift+P` / `Cmd+Shift+P`            | Export PNG           |
+| `Ctrl+Shift+C` / `Cmd+Shift+C`            | Copy to clipboard    |
 
 ## Canvas presets
 
@@ -144,11 +144,14 @@ paintcraft embeds the original image as a WebP byte array under the `img` key in
 
 - [Preact](https://github.com/preactjs/preact) + [TypeScript](https://github.com/microsoft/TypeScript) — UI
 - [Zustand](https://github.com/pmndrs/zustand) — state management
+- [zundo](https://github.com/charkour/zundo) — undo/redo middleware for Zustand
 - [Vite-plus](https://github.com/voidzero-dev/vite-plus) — build tool
 - [Tailwind CSS](https://github.com/tailwindlabs/tailwindcss), [shadcn/ui](https://github.com/shadcn-ui/ui), [lucide-react](https://github.com/lucide-icons/lucide), [react-colorful](https://github.com/omgovich/react-colorful), [@base-ui/react](https://github.com/mui/base-ui)
 - [image-q](https://github.com/ImgPix/image-q) — quantization
 - [pica](https://github.com/nickytonline/pica) — resizing
 - [nbtify](https://github.com/Offroaders123/nbtify) — NBT read/write
 - [@pixelation/aseprite](https://github.com/nickytonline/aseprite-loader), [ag-psd](https://github.com/nickytonline/ag-psd) — file format support
+- [file-saver](https://github.com/eligrey/FileSaver.js) — client-side file downloads
+- [random-word-slugs](https://github.com/Spiderpig86/random-word-slugs) — filename generation
 - [DOMPurify](https://github.com/cure53/DOMPurify) — HTML sanitization
 - [Vitest](https://github.com/vitest-dev/vitest) — tests

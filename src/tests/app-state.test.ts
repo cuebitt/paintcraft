@@ -2,11 +2,17 @@ import { describe, it, expect, beforeEach } from "vite-plus/test";
 import { useAppStore, getProcessImageArgs } from "@/app/store";
 import { CANVAS_TYPES } from "@/types";
 
-describe("appStore", () => {
-  beforeEach(() => {
-    useAppStore.getState().reset();
-  });
+function temporal() {
+  return useAppStore.temporal.getState();
+}
 
+beforeEach(() => {
+  useAppStore.getState().reset();
+  temporal().clear();
+  localStorage.clear();
+});
+
+describe("appStore", () => {
   it("setOriginal sets url and clears error", () => {
     useAppStore.getState().setError("previous error");
     useAppStore.getState().setOriginal("test.png");
@@ -100,16 +106,16 @@ describe("appStore", () => {
     useAppStore.getState().setUnsharpAmount(150);
     expect(useAppStore.getState().unsharpAmount).toBe(150);
 
-    useAppStore.getState()._set({ title: "Sunset" }, "setTitle");
+    useAppStore.getState().setTitle("Sunset");
     expect(useAppStore.getState().title).toBe("Sunset");
 
-    useAppStore.getState()._set({ author: "Player" }, "setAuthor");
+    useAppStore.getState().setAuthor("Player");
     expect(useAppStore.getState().author).toBe("Player");
 
-    useAppStore.getState()._set({ signed: true }, "setSigned");
+    useAppStore.getState().setSigned(true);
     expect(useAppStore.getState().signed).toBe(true);
 
-    useAppStore.getState()._set({ signed: false }, "setSigned");
+    useAppStore.getState().setSigned(false);
     expect(useAppStore.getState().signed).toBe(false);
   });
 
@@ -181,29 +187,31 @@ describe("appStore", () => {
     useAppStore.getState().setOriginal("second.png");
     expect(useAppStore.getState().originalUrl).toBe("second.png");
 
-    useAppStore.getState().undo();
+    temporal().undo();
     expect(useAppStore.getState().originalUrl).toBe("first.png");
 
-    useAppStore.getState().redo();
+    temporal().redo();
     expect(useAppStore.getState().originalUrl).toBe("second.png");
   });
 
   it("undo does nothing when history is empty", () => {
-    useAppStore.getState().undo();
+    temporal().undo();
     expect(useAppStore.getState().originalUrl).toBeNull();
   });
 
   it("redo does nothing when future is empty", () => {
-    useAppStore.getState().redo();
+    temporal().redo();
     expect(useAppStore.getState().originalUrl).toBeNull();
   });
 
   it("new action clears future", () => {
     useAppStore.getState().setOriginal("a.png");
     useAppStore.getState().setOriginal("b.png");
-    useAppStore.getState().undo();
+    temporal().undo();
+    expect(temporal().futureStates.length).toBe(1);
     useAppStore.getState().setOriginal("c.png");
-    useAppStore.getState().redo();
+    expect(temporal().futureStates.length).toBe(0);
+    temporal().redo();
     expect(useAppStore.getState().originalUrl).toBe("c.png");
   });
 

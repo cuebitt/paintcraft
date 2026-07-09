@@ -93,15 +93,13 @@ export function useImageProcessor(processImage: ProcessImageFn): ImageProcessorW
         const img = new Image();
         img.onload = () => {
           originalImageRef.current = img;
-          const prevUrl = useAppStore.getState().originalUrl;
-          if (prevUrl) URL.revokeObjectURL(prevUrl);
           useAppStore.getState().setOriginal(dataUrl);
           const s = useAppStore.getState();
           void processImageRef.current(img, ...getProcessImageArgs(s));
         };
         img.onerror = () => {
           URL.revokeObjectURL(dataUrl);
-          useAppStore.getState().setError("Failed to load parsed image");
+          useAppStore.getState().setError("could not load parsed image");
         };
         img.src = dataUrl;
       }
@@ -118,8 +116,6 @@ export function useImageProcessor(processImage: ProcessImageFn): ImageProcessorW
 
       try {
         const blob = await imageDataToBlob(pendingResult.processedData);
-        const prevProcessedUrl = useAppStore.getState().quantizedUrl;
-        if (prevProcessedUrl) URL.revokeObjectURL(prevProcessedUrl);
         useAppStore
           .getState()
           .setResult(
@@ -150,7 +146,6 @@ export function useImageProcessor(processImage: ProcessImageFn): ImageProcessorW
           msg.imageData.height,
         );
         void imageDataToBlob(displayImageData).then((blob) => {
-          if (displayDataUrlRef.current) URL.revokeObjectURL(displayDataUrlRef.current);
           displayDataUrlRef.current = URL.createObjectURL(blob);
           if (pendingProcessRef.current) {
             pendingProcessRef.current.displayDataUrl = displayDataUrlRef.current;

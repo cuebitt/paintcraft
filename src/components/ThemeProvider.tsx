@@ -64,13 +64,13 @@ export function ThemeProvider({
   embedMode = false,
   ...props
 }: ThemeProviderProps) {
-  const [userTheme, setUserTheme] = useState<Theme>(
+  const [userTheme, setUserTheme] = useState(
     () =>
       embedTheme ??
       (embedMode ? defaultTheme : parseTheme(localStorage.getItem(storageKey), defaultTheme)),
   );
 
-  const [userAccentColor, setUserAccentColor] = useState<AccentColor>(() => {
+  const [userAccentColor, setUserAccentColor] = useState(() => {
     if (embedMode) {
       return embedAccent
         ? (ACCENT_COLORS.find((c) => c.name.toLowerCase() === embedAccent.toLowerCase()) ??
@@ -80,7 +80,7 @@ export function ThemeProvider({
     return resolveAccent(embedAccent ?? null, storageKey);
   });
 
-  const [showTooltips, setShowTooltipsState] = useState<boolean>(() => {
+  const [showTooltips, setShowTooltipsState] = useState(() => {
     if (embedMode) return true;
     const stored = localStorage.getItem(`${storageKey}-tooltips`);
     return stored !== "false";
@@ -129,7 +129,7 @@ export function ThemeProvider({
     [embedMode, storageKey],
   );
 
-  const handleSetTheme = useCallback(
+  const updateTheme = useCallback(
     (newTheme: Theme) => {
       if (!embedMode) localStorage.setItem(storageKey, newTheme);
       setUserTheme(newTheme);
@@ -140,13 +140,13 @@ export function ThemeProvider({
   const value = useMemo(
     () => ({
       theme,
-      setTheme: handleSetTheme,
+      setTheme: updateTheme,
       accentColor,
       setAccentColor,
       showTooltips,
       setShowTooltips,
     }),
-    [theme, handleSetTheme, accentColor, setAccentColor, showTooltips, setShowTooltips],
+    [theme, updateTheme, accentColor, setAccentColor, showTooltips, setShowTooltips],
   );
 
   return (

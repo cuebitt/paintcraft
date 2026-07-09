@@ -66,7 +66,7 @@ export function ResultCards({
             New
           </Button>
         </CardHeader>
-        <CardContent className="overflow-y-auto">
+        <CardContent className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <EmbedSettings />
         </CardContent>
       </Card>

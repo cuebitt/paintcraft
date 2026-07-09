@@ -1,10 +1,11 @@
-import { useEffect, useRef, useCallback, useMemo, useState } from "preact/hooks";
+import { useEffect, useRef, useCallback, useMemo } from "preact/hooks";
 import { AppHeader } from "@/components/AppHeader";
 import { UploadDropzone } from "@/components/UploadDropzone";
 import { PalettesSection } from "@/components/PalettesSection";
 import { EmbedLayout } from "@/components/EmbedLayout";
 import { ResultCards } from "@/components/ResultCards";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useDisclosure } from "@mantine/hooks";
 import { useImageProcessor, type ProcessImageFn } from "@/hooks/useImageProcessor";
 import { useAppCallbacks } from "@/hooks/useAppCallbacks";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -15,10 +16,20 @@ import { preprocessImageForCanvas } from "@/core/preprocess";
 import { useAppStore, getProcessImageArgs } from "@/app/store";
 import { dispatchError } from "@/lib/helpers";
 
+const toggleGrid = () => {
+  useAppStore.getState().setShowGrid(!useAppStore.getState().showGrid);
+};
+
+const toggleQuantize = () => {
+  useAppStore.getState().setQuantizationEnabled(!useAppStore.getState().quantizationEnabled);
+};
+
+const handleReset = () => useAppStore.getState().reset();
+
 function App() {
   const state = useAppStore();
   const { undo, redo } = useAppStore.temporal.getState();
-  const [showOriginal, setShowOriginal] = useState(false);
+  const [showOriginal, { toggle: toggleOrig }] = useDisclosure(false);
 
   const isEmbedded =
     typeof window !== "undefined" &&
@@ -27,14 +38,6 @@ function App() {
       new URLSearchParams(window.location.search).has("embed"));
 
   const { startTimer, endTimer } = usePerformanceMonitor();
-
-  const toggleGrid = () => {
-    useAppStore.getState().setShowGrid(!useAppStore.getState().showGrid);
-  };
-
-  const toggleQuantize = () => {
-    useAppStore.getState().setQuantizationEnabled(!useAppStore.getState().quantizationEnabled);
-  };
 
   const processImage = useCallback<ProcessImageFn>(
     async (
@@ -192,9 +195,6 @@ function App() {
   const hasResults = !!(state.originalUrl && state.preprocessedUrl && state.quantizedUrl);
 
   const activeUrl = showOriginal ? state.originalUrl : state.quantizedUrl;
-
-  const handleReset = () => useAppStore.getState().reset();
-  const toggleOrig = () => setShowOriginal((p) => !p);
 
   const preview = useMemo(
     () => ({

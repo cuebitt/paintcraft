@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import {
   Dialog,
   DialogContent,
@@ -16,10 +16,10 @@ import rawHtml from "@/content/paint_file_format.md?html";
 const html = DOMPurify.sanitize(rawHtml);
 
 export function PaintFormatDialog() {
-  const [open, setOpen] = useState(false);
+  const [opened, { open, close }] = useDisclosure(false);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={opened} onOpenChange={(v) => (v ? open() : close())}>
       <DialogTrigger
         render={
           <Button

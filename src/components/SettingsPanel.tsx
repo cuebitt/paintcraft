@@ -2,7 +2,7 @@ import { useState, useEffect } from "preact/hooks";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/ThemeProvider";
-import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useDebouncedCallback } from "@mantine/hooks";
 import { useAppStore } from "@/app/store";
 import { CanvasSettings } from "@/components/CanvasSettings";
 import { ResizeSettings } from "@/components/ResizeSettings";
@@ -71,17 +71,25 @@ export function SettingsPanel() {
   const currentStep = futureStates.length + 1;
 
   const { showTooltips } = useTheme();
-  const [colorCountLocal, setColorCount] = useDebouncedValue(adaptiveColorCount, 400);
-  const [sharpenLocal, setSharpen] = useDebouncedValue(unsharpAmount, 400);
 
+  const [colorCountLocal, setColorCount] = useState(adaptiveColorCount);
+  useEffect(() => {
+    setColorCount(adaptiveColorCount);
+  }, [adaptiveColorCount]);
+  const debouncedSetColor = useDebouncedCallback((val: number) => setAdaptiveColorCount(val), 150);
   const onColorCount = (val: number) => {
     setColorCount(val);
-    setAdaptiveColorCount(val);
+    debouncedSetColor(val);
   };
 
+  const [sharpenLocal, setSharpen] = useState(unsharpAmount);
+  useEffect(() => {
+    setSharpen(unsharpAmount);
+  }, [unsharpAmount]);
+  const debouncedSetUnsharp = useDebouncedCallback((val: number) => setUnsharpAmount(val), 150);
   const onSharpen = (val: number) => {
     setSharpen(val);
-    setUnsharpAmount(val);
+    debouncedSetUnsharp(val);
   };
 
   return (

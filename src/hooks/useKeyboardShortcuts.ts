@@ -1,36 +1,34 @@
-import { useEffect, useRef } from "preact/hooks";
+import { useHotkeys } from "@mantine/hooks";
+import type { HotkeyItem } from "@mantine/hooks";
+import { useMemo } from "preact/hooks";
 
 type ShortcutMap = Record<string, () => void>;
 
-const isInputElement = (target: EventTarget | null): boolean => {
-  if (!(target instanceof HTMLElement)) return false;
-  const tag = target.tagName;
-  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable;
-};
+function toMantineHotkeys(shortcuts: ShortcutMap): HotkeyItem[] {
+  const seen = new Set<string>();
+  return Object.entries(shortcuts).flatMap(([combo, handler]) => {
+    const entries: HotkeyItem[] = [];
+
+    const normalized = combo
+      .replace(/\bcmd\b/g, "mod")
+      .split("+")
+      .map((part) => {
+        if (part === "mod" || part === "ctrl" || part === "shift" || part === "alt") return part;
+        if (part.length === 1) return part.toUpperCase();
+        return part.charAt(0).toUpperCase() + part.slice(1);
+      })
+      .join("+");
+
+    if (!seen.has(normalized)) {
+      seen.add(normalized);
+      entries.push([normalized, handler]);
+    }
+
+    return entries;
+  });
+}
 
 export function useKeyboardShortcuts(shortcuts: ShortcutMap) {
-  const shortcutsRef = useRef(shortcuts);
-  shortcutsRef.current = shortcuts;
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const parts = [];
-      if (e.metaKey) parts.push("cmd");
-      if (e.ctrlKey) parts.push("ctrl");
-      if (e.shiftKey) parts.push("shift");
-      if (e.altKey) parts.push("alt");
-      parts.push(e.key.toLowerCase());
-      const combo = parts.join("+");
-
-      if (shortcutsRef.current[combo]) {
-        const hasModifier = e.metaKey || e.ctrlKey || e.altKey;
-        if (!hasModifier && isInputElement(e.target)) return;
-        e.preventDefault();
-        shortcutsRef.current[combo]();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  const hotkeys = useMemo(() => toMantineHotkeys(shortcuts), [shortcuts]);
+  useHotkeys(hotkeys);
 }

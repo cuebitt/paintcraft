@@ -1,4 +1,5 @@
-import { useRef, useState } from "preact/hooks";
+import { useRef } from "preact/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import type { TargetedKeyboardEvent } from "preact";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2Icon, UploadIcon } from "lucide-react";
@@ -32,22 +33,22 @@ export function UploadDropzone({
   className,
 }: UploadDropzoneProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isDragActive, setIsDragActive] = useState(false);
+  const [isDragActive, { open: setDragActive, close: setDragInactive }] = useDisclosure(false);
 
   const handleDrag = (e: DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
-      setIsDragActive(true);
+      setDragActive();
     } else if (e.type === "dragleave") {
-      setIsDragActive(false);
+      setDragInactive();
     }
   };
 
   const handleDrop = (e: DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragActive(false);
+    setDragInactive();
 
     const file = e.dataTransfer?.files[0];
     if (file && confirmLargeFile(file)) onUpload(file);

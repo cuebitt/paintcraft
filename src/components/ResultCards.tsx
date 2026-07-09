@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
+import { useResizeObserver, useDisclosure } from "@mantine/hooks";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -42,30 +43,22 @@ export function ResultCards({
   className,
 }: ResultCardsProps) {
   const { showOriginal, showTransparencyGrid, showGrid, activeUrl, cellsX, cellsY } = preview;
-  const [mobileSettingsOpen, setMobileSettingsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [mobileSettingsOpen, { toggle: toggleMobileSettings }] = useDisclosure(false);
+  const resizeObserver = useResizeObserver<HTMLDivElement>();
+  const containerRef = resizeObserver[0] as import("preact").RefObject<HTMLDivElement>;
+  const rect = resizeObserver[1];
   const [fitStyle, setFitStyle] = useState<{ width: number; height: number } | null>(null);
 
   const ratio = cellsX / cellsY;
 
-  const recalc = useCallback(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const { clientWidth: w, clientHeight: h } = el;
+  useEffect(() => {
+    if (!rect) return;
+    const { width: w, height: h } = rect;
     if (w === 0 || h === 0) return;
     const fromW = { width: w, height: Math.round(w / ratio) };
     const fromH = { width: Math.round(h * ratio), height: h };
     setFitStyle(fromW.height <= h ? fromW : fromH);
-  }, [ratio]);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    recalc();
-    const ro = new ResizeObserver(recalc);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [recalc]);
+  }, [rect, ratio]);
 
   return (
     <div className={cn("flex min-h-0 flex-1 flex-col gap-2 md:flex-row", className)}>
@@ -184,7 +177,7 @@ export function ResultCards({
           <Button
             variant={mobileSettingsOpen ? "secondary" : "outline"}
             size="sm"
-            onClick={() => setMobileSettingsOpen(!mobileSettingsOpen)}
+            onClick={toggleMobileSettings}
             className="min-h-9 gap-1 text-xs"
           >
             {mobileSettingsOpen ? (

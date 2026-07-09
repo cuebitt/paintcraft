@@ -131,11 +131,6 @@
   }
 }
 
-.fluid-heading {
-  font-size: clamp(1.25rem, 0.5rem + 2.5vw, 1.875rem);
-  line-height: 1.2;
-}
-
 .image-rendering-pixelated {
   image-rendering: pixelated !important;
 }

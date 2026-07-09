@@ -14,6 +14,12 @@ function TooltipTrigger({ ...props }: TooltipPrimitive.Trigger.Props) {
   // @ts-expect-error -- preact/react type mismatch for @base-ui/react props
   return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
 }
+// NOTE: When using the `render` prop on TooltipTrigger, the rendered element
+// must be a <button> (or a component rendering one), not a <span> or other
+// non-focusable element. @base-ui/react's default render target is `'button'`,
+// and under Preact compat the internal cloneElement prop-merging only reliably
+// forwards hover/focus events to <button> elements. Using a <span> breaks
+// tooltip visibility on hover.
 
 function TooltipContent({
   className,

@@ -5,6 +5,7 @@ import { PalettesSection } from "@/components/PalettesSection";
 import { EmbedLayout } from "@/components/EmbedLayout";
 import { ResultCards } from "@/components/ResultCards";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useDisclosure } from "@mantine/hooks";
 import { useImageProcessor, type ProcessImageFn } from "@/hooks/useImageProcessor";
 import { useAppCallbacks } from "@/hooks/useAppCallbacks";
@@ -238,12 +239,9 @@ function App() {
 
         <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-2 px-4 py-4 sm:px-6 sm:py-8 lg:px-8">
           {state.error && (
-            <div
-              role="alert"
-              className="mx-auto mb-6 max-w-2xl rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive"
-            >
-              {state.error}
-            </div>
+            <Alert variant="destructive" className="mx-auto mb-6 max-w-2xl">
+              <AlertDescription>{state.error}</AlertDescription>
+            </Alert>
           )}
 
           {hasResults ? (

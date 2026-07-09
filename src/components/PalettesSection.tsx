@@ -25,10 +25,10 @@ export const PalettesSection = memo(function PalettesSection({
   const pageColors = adaptivePalette.slice(pageStart, pageStart + PAGE_SIZE);
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-4 sm:gap-8">
       <div className="flex flex-col gap-2 lg:flex-row">
         <PaletteDisplay title="Fixed Palette (16 colors)" colors={FIXED_PALETTE} />
-        <div className="flex min-w-50 flex-1 flex-col gap-3">
+        <div className="flex min-w-0 flex-1 flex-col gap-3">
           <PaletteDisplay
             title={`Adaptive Palette (${adaptiveColorCount} colors)`}
             colors={pageColors}
@@ -40,6 +40,7 @@ export const PalettesSection = memo(function PalettesSection({
                 size="sm"
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={safePage === 0}
+                className="min-h-9 min-w-9 sm:min-h-7 sm:min-w-7"
               >
                 <ChevronLeftIcon className="size-4" />
               </Button>
@@ -51,6 +52,7 @@ export const PalettesSection = memo(function PalettesSection({
                 size="sm"
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={safePage >= totalPages - 1}
+                className="min-h-9 min-w-9 sm:min-h-7 sm:min-w-7"
               >
                 <ChevronRightIcon className="size-4" />
               </Button>

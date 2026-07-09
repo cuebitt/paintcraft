@@ -236,7 +236,7 @@ function App() {
       <div className="flex min-h-screen flex-col bg-background">
         <AppHeader />
 
-        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-2 px-4 py-8 sm:px-6 lg:px-8">
+        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-2 px-4 py-4 sm:px-6 sm:py-8 lg:px-8">
           {state.error && (
             <div
               role="alert"
@@ -254,7 +254,7 @@ function App() {
               handleReset={handleReset}
               onToggleOriginal={toggleOrig}
               preview={preview}
-              className="max-h-[calc(100vh-12rem)]"
+              className="max-h-[calc(100vh-8rem)] sm:max-h-[calc(100vh-12rem)]"
             />
           ) : (
             <div className="mx-auto w-full max-w-2xl">
@@ -272,8 +272,10 @@ function App() {
 
         <footer className="border-t border-border bg-background/80">
           <div className="mx-auto max-w-7xl px-4 py-4 text-center text-sm text-muted-foreground sm:px-6 lg:px-8">
-            paintcraft - Built with Preact + shadcn/ui + TailwindCSS
-            <span className="mx-2">·</span>
+            <span className="block sm:inline">
+              paintcraft - Built with Preact + shadcn/ui + TailwindCSS
+            </span>
+            <span className="mx-2 hidden sm:inline">·</span>
             <a
               href="https://github.com/cuebitt/paintcraft"
               target="_blank"

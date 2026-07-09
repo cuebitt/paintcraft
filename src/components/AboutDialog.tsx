@@ -13,7 +13,15 @@ import { PaintFormatDialog } from "@/components/PaintFormatDialog";
 export function AboutDialog() {
   return (
     <Dialog>
-      <DialogTrigger render={<Button variant="ghost" size="icon-sm" />}>
+      <DialogTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="min-h-9 min-w-9 sm:min-h-7 sm:min-w-7"
+          />
+        }
+      >
         <InfoIcon className="size-4" />
         <span className="sr-only">About paintcraft</span>
       </DialogTrigger>

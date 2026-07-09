@@ -12,9 +12,17 @@ export function ModeToggle() {
   const { setTheme, setAccentColor, showTooltips, setShowTooltips } = useTheme();
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-0.5 sm:gap-1">
       <DropdownMenu>
-        <DropdownMenuTrigger render={<Button variant="outline" size="icon" />}>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="outline"
+              size="icon"
+              className="min-h-9 min-w-9 sm:min-h-8 sm:min-w-8"
+            />
+          }
+        >
           <PaletteIcon className="h-[1.2rem] w-[1.2rem]" style={{ color: `var(--accent)` }} />
           <span className="sr-only">Accent color</span>
         </DropdownMenuTrigger>
@@ -32,7 +40,15 @@ export function ModeToggle() {
       </DropdownMenu>
 
       <DropdownMenu>
-        <DropdownMenuTrigger render={<Button variant="outline" size="icon" />}>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="outline"
+              size="icon"
+              className="min-h-9 min-w-9 sm:min-h-8 sm:min-w-8"
+            />
+          }
+        >
           <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
           <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
           <span className="sr-only">Toggle theme</span>
@@ -49,6 +65,7 @@ export function ModeToggle() {
         size="icon"
         onClick={() => setShowTooltips(!showTooltips)}
         title={showTooltips ? "Hide tooltips" : "Show tooltips"}
+        className="min-h-9 min-w-9 sm:min-h-8 sm:min-w-8"
       >
         <CircleHelpIcon className="h-[1.2rem] w-[1.2rem]" />
         <span className="sr-only">Toggle tooltips</span>

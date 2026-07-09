@@ -21,7 +21,13 @@ export function PaintFormatDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        render={<Button variant="link" size="sm" className="h-auto p-0 text-muted-foreground" />}
+        render={
+          <Button
+            variant="link"
+            size="sm"
+            className="h-auto min-h-9 min-w-9 p-0 text-muted-foreground sm:min-h-7 sm:min-w-7"
+          />
+        }
       >
         <FileTextIcon data-icon="inline-start" />
         File format

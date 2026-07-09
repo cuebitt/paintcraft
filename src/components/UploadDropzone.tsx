@@ -95,13 +95,13 @@ export function UploadDropzone({
       <CardHeader className="items-center text-center">
         <div
           className={cn(
-            "mx-auto mb-2 w-fit rounded-full p-4",
+            "mx-auto mb-2 w-fit rounded-full p-3 sm:p-4",
             isDragActive ? "bg-accent/20" : "bg-accent/10",
           )}
         >
-          <UploadIcon className="size-8 text-accent" />
+          <UploadIcon className="size-6 text-accent sm:size-8" />
         </div>
-        <CardTitle className="text-lg">
+        <CardTitle className="text-base sm:text-lg">
           {isDragActive ? "Drop image here" : "Upload an image"}
         </CardTitle>
         <CardDescription>
@@ -110,10 +110,13 @@ export function UploadDropzone({
       </CardHeader>
 
       <CardContent className="flex flex-col items-center text-center">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
           {["PNG", "JPG", "WEBP", "GIF", "PAINT", "ASE", "PSD", "SVG", "PISKEL", "PIXIL"].map(
             (ext) => (
-              <span key={ext} className="rounded bg-muted px-2 py-1 text-xs text-muted-foreground">
+              <span
+                key={ext}
+                className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground sm:px-2 sm:py-1"
+              >
                 {ext}
               </span>
             ),

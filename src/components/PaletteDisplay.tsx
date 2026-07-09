@@ -9,7 +9,7 @@ interface PaletteDisplayProps {
 
 export function PaletteDisplay({ title, colors }: PaletteDisplayProps) {
   return (
-    <Card className="min-w-[200px] flex-1">
+    <Card className="min-w-0 flex-1">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-sm">
           <SwatchBookIcon className="size-4 text-accent" />
@@ -17,14 +17,14 @@ export function PaletteDisplay({ title, colors }: PaletteDisplayProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-6 gap-2">
+        <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6 sm:gap-2">
           {colors.map((color) => {
             const hex = rgbToHex(color);
             return (
               <div key={hex} className="flex flex-col items-center gap-1">
                 <div
                   title={hex}
-                  className="size-8 rounded-md border border-border shadow-sm"
+                  className="size-7 rounded-md border border-border shadow-sm sm:size-8"
                   style={{ backgroundColor: hex }}
                 />
                 <span className="text-[10px] leading-none text-muted-foreground">{hex}</span>

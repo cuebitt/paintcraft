@@ -166,11 +166,11 @@ export function SettingsPanel() {
         <Button
           variant="ghost"
           size="icon"
-          className="size-6"
+          className="size-8 sm:size-6"
           disabled={pastStates.length === 0}
           onClick={() => undo()}
         >
-          <Undo2Icon className="size-3.5" />
+          <Undo2Icon className="size-4 sm:size-3.5" />
         </Button>
         <span className="min-w-[4rem] text-center tabular-nums">
           {currentStep}/{totalSteps}
@@ -178,11 +178,11 @@ export function SettingsPanel() {
         <Button
           variant="ghost"
           size="icon"
-          className="size-6"
+          className="size-8 sm:size-6"
           disabled={futureStates.length === 0}
           onClick={() => redo()}
         >
-          <Redo2Icon className="size-3.5" />
+          <Redo2Icon className="size-4 sm:size-3.5" />
         </Button>
       </div>
     </Tabs>

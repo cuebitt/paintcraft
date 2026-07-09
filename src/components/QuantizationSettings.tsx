@@ -17,7 +17,7 @@ const QUANT_METHODS: { value: QuantMethod; label: string }[] = [
   { value: "wuquant", label: "WuQuant Remap" },
 ];
 
-type ColorSettingsProps = {
+type QuantizationSettingsProps = {
   quantizationEnabled: boolean;
   quantMethod: QuantMethod;
   colorCountLocal: number;
@@ -30,7 +30,7 @@ type ColorSettingsProps = {
   setIncludeFixedPalette: (include: boolean) => void;
 };
 
-export function ColorSettings({
+export function QuantizationSettings({
   quantizationEnabled,
   quantMethod,
   colorCountLocal,
@@ -41,7 +41,7 @@ export function ColorSettings({
   setQuantMethod,
   handleColorCountChange,
   setIncludeFixedPalette,
-}: ColorSettingsProps) {
+}: QuantizationSettingsProps) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-9 items-center justify-between gap-2">

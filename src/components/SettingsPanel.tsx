@@ -6,7 +6,7 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useAppStore } from "@/app/store";
 import { CanvasSettings } from "@/components/CanvasSettings";
 import { ResizeSettings } from "@/components/ResizeSettings";
-import { ColorSettings } from "@/components/ColorSettings";
+import { QuantizationSettings } from "@/components/QuantizationSettings";
 import { ExportSettings } from "@/components/ExportSettings";
 import { Undo2Icon, Redo2Icon } from "lucide-react";
 
@@ -22,7 +22,7 @@ function useTemporalSnapshot() {
   return useAppStore.temporal.getState();
 }
 
-export function EmbedSettings() {
+export function SettingsPanel() {
   const {
     selectedCanvas,
     paddingColorPreview,
@@ -126,7 +126,7 @@ export function EmbedSettings() {
         </TabsContent>
 
         <TabsContent value="colors" keepMounted>
-          <ColorSettings
+          <QuantizationSettings
             quantizationEnabled={quantizationEnabled}
             quantMethod={quantMethod}
             colorCountLocal={colorCountLocal}

@@ -1,7 +1,7 @@
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftRightIcon, PaintBucketIcon, ImageIcon, UploadIcon } from "lucide-react";
-import { EmbedSettings } from "@/components/EmbedSettings";
+import { SettingsPanel } from "@/components/SettingsPanel";
 
 export type PreviewOptions = {
   showOriginal: boolean;
@@ -67,7 +67,7 @@ export function ResultCards({
           </Button>
         </CardHeader>
         <CardContent className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          <EmbedSettings />
+          <SettingsPanel />
         </CardContent>
       </Card>
 

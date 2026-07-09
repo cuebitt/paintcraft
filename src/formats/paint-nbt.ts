@@ -47,6 +47,29 @@ export interface PaintingData {
   glass?: boolean;
   sidePixels?: [number, number, number][];
   sidesActive?: boolean;
+  format?: PaintFormat;
+}
+
+export function getCanvasTypeByNbtCt(
+  nbtCt: number,
+): CanvasType & { name: string; cellsX: number; cellsY: number } {
+  for (const [sizeKey, ct] of Object.entries(CANVAS_TYPE_BY_SIZE)) {
+    if (ct === nbtCt) {
+      const parts = sizeKey.split("x");
+      const width = Number(parts[0]);
+      const height = Number(parts[1]);
+      return {
+        name: `${width}x${height}`,
+        width,
+        height,
+        cellsX: width / 16,
+        cellsY: height / 16,
+      };
+    }
+  }
+  throw new Error(
+    `Unknown NBT canvas type: ${nbtCt}. Supported types are 0-${Object.keys(CANVAS_TYPE_BY_SIZE).length - 1}.`,
+  );
 }
 
 export function getCanvasTypeIndex(canvas: CanvasType): number {
@@ -86,6 +109,7 @@ export async function writePaintFile(
     generation: new Int32(data.generation),
     v: new Int32(data.version),
     name: data.name,
+    fmt: format,
   };
 
   if (data.title !== "" && data.author !== "") {
@@ -146,18 +170,22 @@ export async function readPaintFile(data: ArrayBuffer | Uint8Array): Promise<Pai
     argb & 0xff,
   ]);
 
-  // TODO: format detection based on field presence is fragile, check a format flag if available
-  const hasGlass = "glass" in root;
-  const hasSidePixels = "sidePixels" in root;
-  const hasSidesActive = "sidesActive" in root;
-
+  const storedFormat = root.fmt as PaintFormat | undefined;
   let detectedFormat: PaintFormat;
-  if (hasGlass || hasSidePixels || hasSidesActive) {
-    detectedFormat = "jop-2x";
-  } else if (ct > 3) {
-    detectedFormat = "jop-delta";
+  if (storedFormat && ["jop-1x", "jop-2x", "jop-delta"].includes(storedFormat)) {
+    detectedFormat = storedFormat;
   } else {
-    detectedFormat = "jop-1x";
+    const hasGlass = "glass" in root;
+    const hasSidePixels = "sidePixels" in root;
+    const hasSidesActive = "sidesActive" in root;
+
+    if (hasGlass || hasSidePixels || hasSidesActive) {
+      detectedFormat = "jop-2x";
+    } else if (ct > 3) {
+      detectedFormat = "jop-delta";
+    } else {
+      detectedFormat = "jop-1x";
+    }
   }
 
   let glass = false;
@@ -186,12 +214,15 @@ export async function readPaintFile(data: ArrayBuffer | Uint8Array): Promise<Pai
     title,
     generation,
     version: v,
+    format: detectedFormat,
     ...(img ? { originalImage: img instanceof Uint8Array ? img : new Uint8Array(img) } : {}),
     ...(detectedFormat === "jop-2x" ? { glass, sidesActive, sidePixels } : {}),
   };
 }
 
 export function detectFormat(painting: PaintingData): PaintFormat {
+  if (painting.format) return painting.format;
+
   const hasGlass = painting.glass !== undefined;
   const hasSidePixels = painting.sidePixels !== undefined;
   const hasSidesActive = painting.sidesActive !== undefined;

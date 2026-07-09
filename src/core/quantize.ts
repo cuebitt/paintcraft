@@ -31,14 +31,7 @@ export function quantize(
   method: QuantMethod = "median-cut",
   options: QuantizeOptions = { colors: 12, includeFixedPalette: true },
 ): QuantizeResult {
-  switch (method) {
-    case "neuquant":
-      return quantizeNeuQuant(imageData, options);
-    case "wuquant":
-      return quantizeWuQuant(imageData, options);
-    case "median-cut":
-      return quantizeMedianCut(imageData, options);
-  }
+  return quantizeImage(imageData, method, options);
 }
 
 function pointContainerToImageData(pc: utils.PointContainer): ImageData {
@@ -72,20 +65,36 @@ function applyPalette(inPC: utils.PointContainer, palette: utils.Palette): utils
   });
 }
 
-// TODO: quantizeMedianCut, quantizeNeuQuant, and quantizeWuQuant are nearly
-// identical, the only difference is the paletteQuantization value and the
-// alpha-preservation step in median-cut. Should deduplicate.
-function quantizeMedianCut(imageData: ImageData, options: QuantizeOptions): QuantizeResult {
+const QUANT_CONFIG: Record<
+  QuantMethod,
+  { paletteQuantization: PaletteQuantization; preserveAlpha: boolean; buildColors: number }
+> = {
+  "median-cut": { paletteQuantization: MEDIAN_CUT, preserveAlpha: true, buildColors: 0 },
+  neuquant: { paletteQuantization: NEUQUANT, preserveAlpha: false, buildColors: 0 },
+  wuquant: { paletteQuantization: WUQUANT, preserveAlpha: false, buildColors: 256 },
+};
+
+function quantizeImage(
+  imageData: ImageData,
+  method: QuantMethod,
+  options: QuantizeOptions,
+): QuantizeResult {
   const { data } = imageData;
-  const alpha = new Uint8Array(data.length / 4);
-  for (let i = 0; i < data.length; i += 4) {
-    alpha[i / 4] = data[i + 3]!;
+  const config = QUANT_CONFIG[method];
+
+  let alpha: Uint8Array | undefined;
+  if (config.preserveAlpha) {
+    alpha = new Uint8Array(data.length / 4);
+    for (let i = 0; i < data.length; i += 4) {
+      alpha[i / 4] = data[i + 3]!;
+    }
   }
 
   const inPC = utils.PointContainer.fromImageData(imageData);
+  const buildColors = config.buildColors || options.colors;
   const adaptiveQ = buildPaletteSync([inPC], {
-    paletteQuantization: MEDIAN_CUT,
-    colors: options.colors,
+    paletteQuantization: config.paletteQuantization,
+    colors: buildColors,
     colorDistanceFormula: DISTANCE,
   });
 
@@ -94,41 +103,11 @@ function quantizeMedianCut(imageData: ImageData, options: QuantizeOptions): Quan
   const outPC = applyPalette(inPC, combinedPalette);
 
   const quantized = pointContainerToImageData(outPC);
-  for (let i = 0; i < alpha.length; i++) {
-    quantized.data[i * 4 + 3] = alpha[i]!;
+  if (alpha) {
+    for (let i = 0; i < alpha.length; i++) {
+      quantized.data[i * 4 + 3] = alpha[i]!;
+    }
   }
 
   return { quantized, adaptivePalette: adaptiveColors };
-}
-
-function quantizeNeuQuant(imageData: ImageData, options: QuantizeOptions): QuantizeResult {
-  const inPC = utils.PointContainer.fromImageData(imageData);
-
-  const adaptiveQ = buildPaletteSync([inPC], {
-    paletteQuantization: NEUQUANT,
-    colors: options.colors,
-    colorDistanceFormula: DISTANCE,
-  });
-
-  const adaptiveColors = extractAdaptiveColors(adaptiveQ.getPointContainer(), options.colors);
-  const combinedPalette = buildCombinedPalette(adaptiveColors, options.includeFixedPalette);
-  const outPC = applyPalette(inPC, combinedPalette);
-
-  return { quantized: pointContainerToImageData(outPC), adaptivePalette: adaptiveColors };
-}
-
-function quantizeWuQuant(imageData: ImageData, options: QuantizeOptions): QuantizeResult {
-  const inPC = utils.PointContainer.fromImageData(imageData);
-
-  const fullQ = buildPaletteSync([inPC], {
-    paletteQuantization: WUQUANT,
-    colors: 256,
-    colorDistanceFormula: DISTANCE,
-  });
-
-  const fullColors = extractAdaptiveColors(fullQ.getPointContainer(), options.colors);
-  const combinedPalette = buildCombinedPalette(fullColors, options.includeFixedPalette);
-  const outPC = applyPalette(inPC, combinedPalette);
-
-  return { quantized: pointContainerToImageData(outPC), adaptivePalette: fullColors };
 }

@@ -1,4 +1,4 @@
-import { createCanvas, getContext2D, loadImage } from "@/formats/canvas";
+import { compositeLayers, loadImage } from "@/formats/canvas";
 
 interface PixilLayerOptions {
   blend: string;
@@ -57,15 +57,10 @@ export async function parsePixil(json: string): Promise<HTMLCanvasElement | Offs
     throw new Error("Pixil file contains no frames");
   }
 
-  const canvas = createCanvas(width, height);
-  const ctx = getContext2D(canvas);
-
   const images = await Promise.all(firstFrame.layers.map((layer) => loadImage(layer.src)));
-  for (let i = 0; i < firstFrame.layers.length; i++) {
-    ctx.globalAlpha = firstFrame.layers[i]!.opacity;
-    ctx.drawImage(images[i]!, 0, 0);
-  }
-  ctx.globalAlpha = 1;
-
-  return canvas;
+  return compositeLayers(
+    images.map((img, i) => ({ image: img, opacity: firstFrame.layers[i]!.opacity })),
+    width,
+    height,
+  );
 }

@@ -1,4 +1,5 @@
-type CanvasImageSource = HTMLImageElement | ImageBitmap;
+export type CanvasSource = HTMLCanvasElement | OffscreenCanvas;
+export type CanvasImageSource = HTMLImageElement | ImageBitmap;
 
 export function loadImage(dataUri: string): Promise<CanvasImageSource> {
   if (typeof document !== "undefined") {
@@ -36,7 +37,7 @@ export function loadImage(dataUri: string): Promise<CanvasImageSource> {
   return createImageBitmap(blob);
 }
 
-export function createCanvas(width: number, height: number): HTMLCanvasElement | OffscreenCanvas {
+export function createCanvas(width: number, height: number): CanvasSource {
   if (typeof document !== "undefined") {
     const canvas = document.createElement("canvas");
     canvas.width = width;
@@ -46,8 +47,23 @@ export function createCanvas(width: number, height: number): HTMLCanvasElement |
   return new OffscreenCanvas(width, height);
 }
 
+export async function compositeLayers(
+  layers: { image: CanvasSource | CanvasImageSource; opacity: number }[],
+  width: number,
+  height: number,
+): Promise<CanvasSource> {
+  const canvas = createCanvas(width, height);
+  const ctx = getContext2D(canvas);
+  for (const { image, opacity } of layers) {
+    ctx.globalAlpha = opacity;
+    ctx.drawImage(image, 0, 0);
+  }
+  ctx.globalAlpha = 1;
+  return canvas;
+}
+
 export function getContext2D(
-  canvas: HTMLCanvasElement | OffscreenCanvas,
+  canvas: CanvasSource,
 ): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Failed to get canvas 2d context");

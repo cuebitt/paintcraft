@@ -1,4 +1,4 @@
-import { createCanvas, getContext2D, loadImage } from "@/formats/canvas";
+import { compositeLayers, createCanvas, getContext2D, loadImage } from "@/formats/canvas";
 
 interface PiskelChunk {
   layout: number[][];
@@ -82,17 +82,12 @@ export async function parsePiskel(json: string): Promise<HTMLCanvasElement | Off
 
   const layers: PiskelLayer[] = layerStrings.map((s) => JSON.parse(s) as PiskelLayer);
 
-  const canvas = createCanvas(width, height);
-  const ctx = getContext2D(canvas);
-
   const frameCanvases = await Promise.all(
     layers.map((layer) => extractFirstFrame(layer, width, height, modelVersion)),
   );
-  for (let i = 0; i < layers.length; i++) {
-    ctx.globalAlpha = layers[i]!.opacity;
-    ctx.drawImage(frameCanvases[i]!, 0, 0);
-  }
-  ctx.globalAlpha = 1;
-
-  return canvas;
+  return compositeLayers(
+    frameCanvases.map((canvas, i) => ({ image: canvas, opacity: layers[i]!.opacity })),
+    width,
+    height,
+  );
 }

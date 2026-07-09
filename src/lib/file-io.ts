@@ -2,18 +2,17 @@ import { saveAs } from "file-saver";
 import { generateSlug } from "random-word-slugs";
 import type { ImageProcessorWorkers } from "@/hooks/useImageProcessor";
 import { useAppStore } from "@/app/store";
-import { CANVAS_TYPES } from "@/types";
+import { createCanvas } from "@/formats/canvas";
 import {
   writePaintFile,
   readPaintFile,
   getCanvasTypeIndex,
+  getCanvasTypeByNbtCt,
   detectFormat,
 } from "@/formats/paint-nbt";
 import type { PaintingData } from "@/formats/paint-nbt";
 import { imageDataToBlob } from "@/lib/utils";
 import { dispatchError } from "@/lib/helpers";
-
-const NBT_CT_TO_CANVAS_INDEX = [0, 3, 1, 2] as const;
 
 function sanitizeForFilename(s: string): string {
   return s
@@ -31,11 +30,7 @@ export function importPaintFile(file: File, workers: ImageProcessorWorkers) {
 
       const detectedFormat = detectFormat(painting);
 
-      const canvasTypeIndex = NBT_CT_TO_CANVAS_INDEX[painting.canvasType];
-      if (canvasTypeIndex === undefined) {
-        throw new Error(`Unknown canvas type: ${painting.canvasType}`);
-      }
-      const canvasType = CANVAS_TYPES[canvasTypeIndex]!;
+      const canvasType = getCanvasTypeByNbtCt(painting.canvasType);
 
       const data = new Uint8ClampedArray(canvasType.width * canvasType.height * 4);
       for (let i = 0; i < painting.pixels.length; i++) {
@@ -206,24 +201,29 @@ export async function exportPaintFile(
   saveAs(blob, filename);
 }
 
-export function exportPng(workers: ImageProcessorWorkers): void {
+export async function exportPng(workers: ImageProcessorWorkers): Promise<void> {
   if (!workers.quantizedDataRef.current) return;
 
   const { quantized } = workers.quantizedDataRef.current;
-  const canvas = document.createElement("canvas");
-  canvas.width = quantized.width;
-  canvas.height = quantized.height;
+  const canvas = createCanvas(quantized.width, quantized.height);
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
   ctx.putImageData(quantized, 0, 0);
 
-  canvas.toBlob((blob) => {
-    if (!blob) {
-      useAppStore.getState().setError("Failed to export PNG");
-      return;
-    }
-    const timestamp = Date.now().toString(36);
-    const name = `${generateSlug(4)}_${timestamp}`;
-    saveAs(blob, `painting_${name}.png`);
-  }, "image/png");
+  let blob: Blob | null = null;
+  if (canvas instanceof HTMLCanvasElement) {
+    blob = await new Promise((resolve) =>
+      canvas.toBlob(resolve as (b: Blob | null) => void, "image/png"),
+    );
+  } else {
+    blob = await (canvas as OffscreenCanvas).convertToBlob({ type: "image/png" });
+  }
+
+  if (!blob) {
+    useAppStore.getState().setError("Failed to export PNG");
+    return;
+  }
+  const timestamp = Date.now().toString(36);
+  const name = `${generateSlug(4)}_${timestamp}`;
+  saveAs(blob, `painting_${name}.png`);
 }

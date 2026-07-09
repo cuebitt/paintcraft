@@ -48,49 +48,55 @@ export function ResizeSettings({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <ScalingIcon className="size-4 shrink-0 text-accent" />
-          Resize Filter
-        </span>
         <Tooltip disabled={!showTooltips}>
           <TooltipTrigger
             render={
-              <Select
-                value={resizeFilter}
-                onValueChange={(v) => setResizeFilter(v as ResizeFilter)}
-                disabled={loading}
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
               >
-                <SelectTrigger className="w-36">
-                  <span className="flex flex-1 text-left">
-                    {RESIZE_FILTERS.find((f) => f.value === resizeFilter)?.label ?? resizeFilter}
-                  </span>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {RESIZE_FILTERS.map((f) => (
-                      <SelectItem key={f.value} value={f.value}>
-                        {f.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+                <ScalingIcon className="size-4 shrink-0 text-accent" />
+                Resize Filter
+              </button>
             }
           />
           <TooltipContent side="bottom" sideOffset={8}>
             Algorithm used when resizing the image to fit the canvas
           </TooltipContent>
         </Tooltip>
+        <Select
+          value={resizeFilter}
+          onValueChange={(v) => setResizeFilter(v as ResizeFilter)}
+          disabled={loading}
+        >
+          <SelectTrigger className="w-36">
+            <span className="flex flex-1 text-left">
+              {RESIZE_FILTERS.find((f) => f.value === resizeFilter)?.label ?? resizeFilter}
+            </span>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {RESIZE_FILTERS.map((f) => (
+                <SelectItem key={f.value} value={f.value}>
+                  {f.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
         <Tooltip disabled={!showTooltips}>
           <TooltipTrigger
             render={
-              <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
+              >
                 <WandIcon className="size-4 shrink-0 text-accent" />
                 Sharpen
-              </span>
+              </button>
             }
           />
           <TooltipContent side="bottom" sideOffset={8}>
@@ -114,46 +120,61 @@ export function ResizeSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <Maximize2Icon className="size-4 shrink-0 text-accent" />
-          Fit Mode
-        </span>
         <Tooltip disabled={!showTooltips}>
           <TooltipTrigger
             render={
-              <Select
-                value={fitMode}
-                onValueChange={(v) => setFitMode(v as ImageFitMode)}
-                disabled={loading}
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
               >
-                <SelectTrigger className="w-36">
-                  <span className="flex flex-1 text-left">
-                    {FIT_MODES.find((m) => m.value === fitMode)?.label ?? fitMode}
-                  </span>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {FIT_MODES.map((m) => (
-                      <SelectItem key={m.value} value={m.value}>
-                        {m.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+                <Maximize2Icon className="size-4 shrink-0 text-accent" />
+                Fit Mode
+              </button>
             }
           />
           <TooltipContent side="bottom" sideOffset={8}>
             How the image fits within the canvas dimensions
           </TooltipContent>
         </Tooltip>
+        <Select
+          value={fitMode}
+          onValueChange={(v) => setFitMode(v as ImageFitMode)}
+          disabled={loading}
+        >
+          <SelectTrigger className="w-36">
+            <span className="flex flex-1 text-left">
+              {FIT_MODES.find((m) => m.value === fitMode)?.label ?? fitMode}
+            </span>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {FIT_MODES.map((m) => (
+                <SelectItem key={m.value} value={m.value}>
+                  {m.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <RefreshCwIcon className="size-4 shrink-0 text-accent" />
-          Reprocess
-        </span>
+        <Tooltip disabled={!showTooltips}>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
+              >
+                <RefreshCwIcon className="size-4 shrink-0 text-accent" />
+                Reprocess
+              </button>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={8}>
+            Re-runs image processing. This action cannot be undone.
+          </TooltipContent>
+        </Tooltip>
         <Tooltip disabled={!showTooltips}>
           <TooltipTrigger
             render={
@@ -164,7 +185,7 @@ export function ResizeSettings({
             }
           />
           <TooltipContent side="bottom" sideOffset={8}>
-            Re-runs image processing. This action cannot be undone.
+            Cannot be undone
           </TooltipContent>
         </Tooltip>
       </div>

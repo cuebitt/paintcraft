@@ -59,84 +59,104 @@ export function CanvasSettings({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <Grid3x3Icon className="size-4 shrink-0 text-accent" />
-          Canvas Size
-        </span>
         <Tooltip disabled={!showTooltips}>
           <TooltipTrigger
             render={
-              <Select
-                value={selectedAllowed ? selectedCanvas.name : filteredCanvases[0]?.name}
-                onValueChange={(value) => {
-                  const canvas = CANVAS_TYPES.find((c) => c.name === value);
-                  if (canvas) setCanvas(canvas);
-                }}
-                disabled={loading}
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
               >
-                <SelectTrigger className="w-36">
-                  <span className="flex flex-1 text-left">
-                    {selectedAllowed ? selectedCanvas.name : filteredCanvases[0]?.name}
-                  </span>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {filteredCanvases.map((canvas) => (
-                      <SelectItem key={canvas.name} value={canvas.name}>
-                        {canvas.name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+                <Grid3x3Icon className="size-4 shrink-0 text-accent" />
+                Canvas Size
+              </button>
             }
           />
           <TooltipContent side="bottom" sideOffset={8}>
             Choose the painting canvas size
           </TooltipContent>
         </Tooltip>
+        <Select
+          value={selectedAllowed ? selectedCanvas.name : filteredCanvases[0]?.name}
+          onValueChange={(value) => {
+            const canvas = CANVAS_TYPES.find((c) => c.name === value);
+            if (canvas) setCanvas(canvas);
+          }}
+          disabled={loading}
+        >
+          <SelectTrigger className="w-36">
+            <span className="flex flex-1 text-left">
+              {selectedAllowed ? selectedCanvas.name : filteredCanvases[0]?.name}
+            </span>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {filteredCanvases.map((canvas) => (
+                <SelectItem key={canvas.name} value={canvas.name}>
+                  {canvas.name}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <PaintbrushIcon className="size-4 shrink-0 text-accent" />
-          Padding
-        </span>
         <Tooltip disabled={!showTooltips}>
           <TooltipTrigger
             render={
-              <PopoverPicker
-                color={hexColor}
-                alpha={glass}
-                showTransparencyGrid={showTransparencyGrid}
-                onChange={(hex) => {
-                  if (glass) {
-                    const { color, alpha } = hexToRgba(hex);
-                    setPaddingColorPreview(color, alpha);
-                  } else {
-                    setPaddingColorPreview(hexToRgb(hex), 1);
-                  }
-                }}
-                onChangeEnd={(hex) => {
-                  if (glass) {
-                    const { color, alpha } = hexToRgba(hex);
-                    setPaddingColor(color, alpha);
-                  } else {
-                    setPaddingColor(hexToRgb(hex), 1);
-                  }
-                }}
-              />
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
+              >
+                <PaintbrushIcon className="size-4 shrink-0 text-accent" />
+                Padding
+              </button>
             }
           />
-          <TooltipContent>Set the background color for padding areas</TooltipContent>
+          <TooltipContent side="bottom" sideOffset={8}>
+            Set the background color for padding areas
+          </TooltipContent>
         </Tooltip>
+        <PopoverPicker
+          color={hexColor}
+          alpha={glass}
+          showTransparencyGrid={showTransparencyGrid}
+          onChange={(hex) => {
+            if (glass) {
+              const { color, alpha } = hexToRgba(hex);
+              setPaddingColorPreview(color, alpha);
+            } else {
+              setPaddingColorPreview(hexToRgb(hex), 1);
+            }
+          }}
+          onChangeEnd={(hex) => {
+            if (glass) {
+              const { color, alpha } = hexToRgba(hex);
+              setPaddingColor(color, alpha);
+            } else {
+              setPaddingColor(hexToRgb(hex), 1);
+            }
+          }}
+        />
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <Grid3x3Icon className="size-4 shrink-0 text-accent" />
-          Cell Grid
-        </span>
+        <Tooltip disabled={!showTooltips}>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
+              >
+                <Grid3x3Icon className="size-4 shrink-0 text-accent" />
+                Cell Grid
+              </button>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={8}>
+            Overlays the canvas cell grid on the preview
+          </TooltipContent>
+        </Tooltip>
         <Switch
           id="setting-grid-toggle"
           checked={showGrid}
@@ -144,10 +164,23 @@ export function CanvasSettings({
         />
       </div>
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <LayersIcon className="size-4 shrink-0 text-accent" />
-          Transparency Grid
-        </span>
+        <Tooltip disabled={!showTooltips}>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
+              >
+                <LayersIcon className="size-4 shrink-0 text-accent" />
+                <span className="hidden sm:inline">Transparency Background</span>
+                <span className="sm:hidden">Transparency BG</span>
+              </button>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={8}>
+            Shows a checkerboard pattern behind transparent areas
+          </TooltipContent>
+        </Tooltip>
         <Switch
           id="setting-transparency-toggle"
           checked={showTransparencyGrid}

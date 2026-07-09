@@ -45,10 +45,22 @@ export function QuantizationSettings({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <SparklesIcon className="size-4 shrink-0 text-accent" />
-          Quantize
-        </span>
+        <Tooltip disabled={!showTooltips}>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
+              >
+                <SparklesIcon className="size-4 shrink-0 text-accent" />
+                Quantize
+              </button>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={8}>
+            Enable or disable color quantization
+          </TooltipContent>
+        </Tooltip>
         <Switch
           id="setting-quantization-toggle"
           checked={quantizationEnabled}
@@ -58,46 +70,61 @@ export function QuantizationSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <SparklesIcon className="size-4 shrink-0 text-accent" />
-          Method
-        </span>
         <Tooltip disabled={!showTooltips}>
           <TooltipTrigger
             render={
-              <Select
-                value={quantMethod}
-                onValueChange={(v) => setQuantMethod(v as QuantMethod)}
-                disabled={loading || !quantizationEnabled}
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
               >
-                <SelectTrigger className="w-36">
-                  <span className="flex flex-1 text-left">
-                    {QUANT_METHODS.find((m) => m.value === quantMethod)?.label ?? quantMethod}
-                  </span>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {QUANT_METHODS.map((m) => (
-                      <SelectItem key={m.value} value={m.value}>
-                        {m.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+                <SparklesIcon className="size-4 shrink-0 text-accent" />
+                Method
+              </button>
             }
           />
           <TooltipContent side="bottom" sideOffset={8}>
             Algorithm used for color quantization
           </TooltipContent>
         </Tooltip>
+        <Select
+          value={quantMethod}
+          onValueChange={(v) => setQuantMethod(v as QuantMethod)}
+          disabled={loading || !quantizationEnabled}
+        >
+          <SelectTrigger className="w-36">
+            <span className="flex flex-1 text-left">
+              {QUANT_METHODS.find((m) => m.value === quantMethod)?.label ?? quantMethod}
+            </span>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {QUANT_METHODS.map((m) => (
+                <SelectItem key={m.value} value={m.value}>
+                  {m.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <HashIcon className="size-4 shrink-0 text-accent" />
-          Color Count
-        </span>
+        <Tooltip disabled={!showTooltips}>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
+              >
+                <HashIcon className="size-4 shrink-0 text-accent" />
+                Color Count
+              </button>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={8}>
+            Number of adaptive colors to extract (1–256)
+          </TooltipContent>
+        </Tooltip>
         <Input
           id="setting-adaptive-colors"
           type="number"
@@ -116,10 +143,22 @@ export function QuantizationSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <SwatchBookIcon className="size-4 shrink-0 text-accent" />
-          Fixed Palette
-        </span>
+        <Tooltip disabled={!showTooltips}>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
+              >
+                <SwatchBookIcon className="size-4 shrink-0 text-accent" />
+                Fixed Palette
+              </button>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={8}>
+            Merges Minecraft's 16-color palette with the adaptive colors
+          </TooltipContent>
+        </Tooltip>
         <Switch
           id="setting-fixed-palette-toggle"
           checked={includeFixedPalette}

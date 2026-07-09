@@ -60,46 +60,61 @@ export function ExportSettings({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <FileIcon className="size-4 shrink-0 text-accent" />
-          Format
-        </span>
         <Tooltip disabled={!showTooltips}>
           <TooltipTrigger
             render={
-              <Select
-                value={paintFormat}
-                onValueChange={(v) => setPaintFormat(v as PaintFormat)}
-                disabled={loading}
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
               >
-                <SelectTrigger className="w-36">
-                  <span className="flex flex-1 text-left">
-                    {PAINT_FORMATS.find((f) => f.value === paintFormat)?.label ?? paintFormat}
-                  </span>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {PAINT_FORMATS.map((f) => (
-                      <SelectItem key={f.value} value={f.value}>
-                        {f.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+                <FileIcon className="size-4 shrink-0 text-accent" />
+                Format
+              </button>
             }
           />
           <TooltipContent side="bottom" sideOffset={8}>
             {PAINT_FORMATS.find((f) => f.value === paintFormat)?.description}
           </TooltipContent>
         </Tooltip>
+        <Select
+          value={paintFormat}
+          onValueChange={(v) => setPaintFormat(v as PaintFormat)}
+          disabled={loading}
+        >
+          <SelectTrigger className="w-36">
+            <span className="flex flex-1 text-left">
+              {PAINT_FORMATS.find((f) => f.value === paintFormat)?.label ?? paintFormat}
+            </span>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {PAINT_FORMATS.map((f) => (
+                <SelectItem key={f.value} value={f.value}>
+                  {f.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <GlassWaterIcon className="size-4 shrink-0 text-accent" />
-          Glass Canvas
-        </span>
+        <Tooltip disabled={!showTooltips}>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
+              >
+                <GlassWaterIcon className="size-4 shrink-0 text-accent" />
+                Glass Canvas
+              </button>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={8}>
+            Enables transparency on the canvas padding
+          </TooltipContent>
+        </Tooltip>
         <Switch
           id="setting-glass-toggle"
           checked={glass}
@@ -109,10 +124,22 @@ export function ExportSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <BoxIcon className="size-4 shrink-0 text-accent" />
-          Paint Sides
-        </span>
+        <Tooltip disabled={!showTooltips}>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
+              >
+                <BoxIcon className="size-4 shrink-0 text-accent" />
+                Paint Sides
+              </button>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={8}>
+            Paint the block sides with edge colors (jop-2x only)
+          </TooltipContent>
+        </Tooltip>
         <Switch
           id="setting-sides-toggle"
           checked={sidesActive}
@@ -122,10 +149,22 @@ export function ExportSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <PenIcon className="size-4 shrink-0 text-accent" />
-          {signed ? "Signed" : "Unsigned"}
-        </span>
+        <Tooltip disabled={!showTooltips}>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
+              >
+                <PenIcon className="size-4 shrink-0 text-accent" />
+                Signed
+              </button>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={8}>
+            Adds author name and title metadata to the .paint file
+          </TooltipContent>
+        </Tooltip>
         <Switch
           id="setting-signed-toggle"
           checked={signed}
@@ -135,10 +174,22 @@ export function ExportSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <PaperclipIcon className="size-4 shrink-0 text-accent" />
-          Embed Original
-        </span>
+        <Tooltip disabled={!showTooltips}>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
+              >
+                <PaperclipIcon className="size-4 shrink-0 text-accent" />
+                Embed Original
+              </button>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={8}>
+            Embeds the original image for round-trip editing
+          </TooltipContent>
+        </Tooltip>
         <Switch
           id="setting-embed-original-toggle"
           checked={embedOriginalImage}
@@ -148,10 +199,22 @@ export function ExportSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <TypeIcon className="size-4 shrink-0 text-accent" />
-          Title
-        </span>
+        <Tooltip disabled={!showTooltips}>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
+              >
+                <TypeIcon className="size-4 shrink-0 text-accent" />
+                Title
+              </button>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={8}>
+            Painting title (requires Signed toggle)
+          </TooltipContent>
+        </Tooltip>
         <Input
           id="setting-painting-title"
           maxLength={64}
@@ -164,10 +227,22 @@ export function ExportSettings({
       </div>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <UserIcon className="size-4 shrink-0 text-accent" />
-          Author
-        </span>
+        <Tooltip disabled={!showTooltips}>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
+              >
+                <UserIcon className="size-4 shrink-0 text-accent" />
+                Author
+              </button>
+            }
+          />
+          <TooltipContent side="bottom" sideOffset={8}>
+            Author name (requires Signed toggle)
+          </TooltipContent>
+        </Tooltip>
         <Input
           id="setting-painting-author"
           maxLength={64}

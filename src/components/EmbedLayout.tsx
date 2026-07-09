@@ -1,6 +1,7 @@
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ResultCards, type PreviewOptions } from "@/components/ResultCards";
 import { UploadDropzone } from "@/components/UploadDropzone";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type EmbedLayoutProps = {
   error: string | null;
@@ -29,12 +30,9 @@ export function EmbedLayout({
     <TooltipProvider>
       <div className="embed-mode flex h-dvh flex-col overflow-hidden p-2">
         {error && (
-          <div
-            role="alert"
-            className="mx-auto mb-6 max-w-2xl rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive"
-          >
-            {error}
-          </div>
+          <Alert variant="destructive" className="mx-auto mb-6 max-w-2xl">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
         <div className="flex min-h-0 flex-1 flex-col">
           {hasResults ? (

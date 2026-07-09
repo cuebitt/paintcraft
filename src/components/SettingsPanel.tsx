@@ -1,6 +1,8 @@
 import { useState, useEffect } from "preact/hooks";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useTheme } from "@/components/ThemeProvider";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useAppStore } from "@/app/store";
@@ -170,28 +172,43 @@ export function SettingsPanel() {
         />
       </TabsContent>
 
-      <div className="flex shrink-0 items-center justify-center gap-1 border-t border-border px-2 py-2 text-xs text-muted-foreground">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8 sm:size-6"
-          disabled={pastStates.length === 0}
-          onClick={() => undo()}
-        >
-          <Undo2Icon className="size-4 sm:size-3.5" />
-        </Button>
+      <Separator />
+      <div className="flex shrink-0 items-center justify-center gap-1 px-2 py-2 text-xs text-muted-foreground">
+        <Tooltip disabled={!showTooltips}>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8 sm:size-6"
+                disabled={pastStates.length === 0}
+                onClick={() => undo()}
+              >
+                <Undo2Icon className="size-4 sm:size-3.5" />
+              </Button>
+            }
+          />
+          <TooltipContent side="bottom">Undo (⌘Z)</TooltipContent>
+        </Tooltip>
         <span className="min-w-[4rem] text-center tabular-nums">
           {currentStep}/{totalSteps}
         </span>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8 sm:size-6"
-          disabled={futureStates.length === 0}
-          onClick={() => redo()}
-        >
-          <Redo2Icon className="size-4 sm:size-3.5" />
-        </Button>
+        <Tooltip disabled={!showTooltips}>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8 sm:size-6"
+                disabled={futureStates.length === 0}
+                onClick={() => redo()}
+              >
+                <Redo2Icon className="size-4 sm:size-3.5" />
+              </Button>
+            }
+          />
+          <TooltipContent side="bottom">Redo (⌘⇧Z)</TooltipContent>
+        </Tooltip>
       </div>
     </Tabs>
   );

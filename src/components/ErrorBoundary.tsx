@@ -1,5 +1,6 @@
 import { Component } from "preact";
 import type { ComponentChildren, ComponentChild, ErrorInfo } from "preact";
+import { Button } from "@/components/ui/button";
 
 interface ErrorBoundaryProps {
   children: ComponentChildren;
@@ -40,13 +41,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           <p className="mb-4 text-sm text-muted-foreground">
             {this.state.error?.message ?? "Unknown error"}
           </p>
-          <button
-            onClick={() => this.setState({ hasError: false, error: null })}
-            type="button"
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          >
+          <Button onClick={() => this.setState({ hasError: false, error: null })} variant="default">
             Try again
-          </button>
+          </Button>
         </div>
       </div>
     );

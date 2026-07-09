@@ -1,6 +1,6 @@
 import { HexColorPicker, HexAlphaColorPicker } from "react-colorful";
 
-import { Popover } from "@base-ui/react/popover";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 interface PopoverPickerProps {
   color: string;
@@ -25,31 +25,27 @@ export function PopoverPicker({
   const isTranslucent = alpha && color.length === 9 && color.slice(7, 9) !== "ff";
 
   return (
-    <Popover.Root>
-      <Popover.Trigger
+    <Popover>
+      <PopoverTrigger
         className={`h-7 w-7 cursor-pointer rounded-lg border-2 border-border shadow-sm ${showTransparencyGrid && isTranslucent ? "transparency-grid" : ""}`}
         style={{ backgroundColor: color }}
       />
-      <Popover.Portal>
-        <Popover.Positioner sideOffset={8}>
-          <Popover.Popup className="w-[200px] rounded-lg border border-border shadow-lg">
-            <Picker color={color} onChange={onChange} onChangeEnd={onChangeEnd} />
-            {/* onInput is the Preact equivalent of React's onChange, this input IS controlled */}
-            {/* oxlint-disable-next-line react-doctor/no-uncontrolled-input */}
-            <input
-              value={color}
-              aria-label="Hex color"
-              onInput={(e) => {
-                const val = (e.target as HTMLInputElement).value;
-                if (hexRegex.test(val)) {
-                  onChange(val);
-                }
-              }}
-              className="w-full rounded-b-lg border-t border-border bg-background px-3 py-2 text-sm focus:outline-none"
-            />
-          </Popover.Popup>
-        </Popover.Positioner>
-      </Popover.Portal>
-    </Popover.Root>
+      <PopoverContent sideOffset={8} className="w-[200px] p-0">
+        <Picker color={color} onChange={onChange} onChangeEnd={onChangeEnd} />
+        {/* onInput is the Preact equivalent of React's onChange, this input IS controlled */}
+        {/* oxlint-disable-next-line react-doctor/no-uncontrolled-input */}
+        <input
+          value={color}
+          aria-label="Hex color"
+          onInput={(e) => {
+            const val = (e.target as HTMLInputElement).value;
+            if (hexRegex.test(val)) {
+              onChange(val);
+            }
+          }}
+          className="w-full rounded-b-lg border-t border-border bg-background px-3 py-2 text-sm focus:outline-none"
+        />
+      </PopoverContent>
+    </Popover>
   );
 }

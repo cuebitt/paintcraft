@@ -2,7 +2,8 @@ import { useRef } from "preact/hooks";
 import { useDisclosure } from "@mantine/hooks";
 import type { TargetedKeyboardEvent } from "preact";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2Icon, UploadIcon } from "lucide-react";
+import { UploadIcon } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
 function formatSize(bytes: number): string {
@@ -126,7 +127,7 @@ export function UploadDropzone({
 
         {loading && (
           <div className="mt-6 flex items-center gap-3">
-            <Loader2Icon className="size-5 animate-spin text-accent" />
+            <Spinner className="size-5 text-accent" />
             <span className="text-sm text-muted-foreground">Processing...</span>
           </div>
         )}

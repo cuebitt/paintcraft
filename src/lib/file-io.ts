@@ -205,14 +205,6 @@ export async function exportPaintFile(
   saveAs(blob, filename);
 }
 
-// export function exportPngOld(workers: ImageProcessorWorkers): void {
-//   // old approach — kept for reference in case OffscreenCanvas has issues
-//   const { quantized } = workers.quantizedDataRef.current!;
-//   const link = document.createElement("a");
-//   link.download = `painting_${Date.now()}.png`;
-//   // ...would need canvas.toDataURL here
-// }
-
 export function exportPng(workers: ImageProcessorWorkers): void {
   if (!workers.quantizedDataRef.current) return;
 

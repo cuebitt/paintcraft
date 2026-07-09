@@ -50,7 +50,7 @@ export function QuantizationSettings({
           <span className="text-sm font-medium text-foreground">Quantize</span>
         </span>
         <Switch
-          id="embed-quantization-toggle"
+          id="setting-quantization-toggle"
           checked={quantizationEnabled}
           onCheckedChange={() => setQuantizationEnabled(!quantizationEnabled)}
           disabled={loading}
@@ -99,14 +99,14 @@ export function QuantizationSettings({
           <span className="text-sm font-medium text-foreground">Color Count</span>
         </span>
         <Input
-          id="embed-adaptive-colors"
+          id="setting-adaptive-colors"
           type="number"
           min={1}
           max={256}
           value={colorCountLocal}
           onChange={(e) => {
             const val = parseInt((e.target as HTMLInputElement).value, 10);
-            if (!isNaN(val) && val >= 1 && val <= 256) {
+            if (!Number.isNaN(val) && val >= 1 && val <= 256) {
               handleColorCountChange(val);
             }
           }}
@@ -121,7 +121,7 @@ export function QuantizationSettings({
           <span className="text-sm font-medium text-foreground">Fixed Palette</span>
         </span>
         <Switch
-          id="embed-fixed-palette-toggle"
+          id="setting-fixed-palette-toggle"
           checked={includeFixedPalette}
           onCheckedChange={() => setIncludeFixedPalette(!includeFixedPalette)}
           disabled={loading || !quantizationEnabled}

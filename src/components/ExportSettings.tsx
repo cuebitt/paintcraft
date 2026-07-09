@@ -101,7 +101,7 @@ export function ExportSettings({
           <span className="text-sm font-medium text-foreground">Glass Canvas</span>
         </span>
         <Switch
-          id="embed-glass-toggle"
+          id="setting-glass-toggle"
           checked={glass}
           onCheckedChange={() => setGlass(!glass)}
           disabled={loading || paintFormat !== "jop-2x"}
@@ -114,7 +114,7 @@ export function ExportSettings({
           <span className="text-sm font-medium text-foreground">Paint Sides</span>
         </span>
         <Switch
-          id="embed-sides-toggle"
+          id="setting-sides-toggle"
           checked={sidesActive}
           onCheckedChange={() => setSidesActive(!sidesActive)}
           disabled={loading || paintFormat !== "jop-2x"}
@@ -129,7 +129,7 @@ export function ExportSettings({
           </span>
         </span>
         <Switch
-          id="embed-signed-toggle"
+          id="setting-signed-toggle"
           checked={signed}
           onCheckedChange={() => setSigned(!signed)}
           disabled={loading}
@@ -142,7 +142,7 @@ export function ExportSettings({
           <span className="text-sm font-medium text-foreground">Embed Original</span>
         </span>
         <Switch
-          id="embed-embed-original-toggle"
+          id="setting-embed-original-toggle"
           checked={embedOriginalImage}
           onCheckedChange={() => setEmbedOriginalImage(!embedOriginalImage)}
           disabled={loading}
@@ -155,7 +155,7 @@ export function ExportSettings({
           <span className="text-sm font-medium text-foreground">Title</span>
         </span>
         <Input
-          id="embed-painting-title"
+          id="setting-painting-title"
           type="text"
           maxLength={64}
           value={title}
@@ -172,7 +172,7 @@ export function ExportSettings({
           <span className="text-sm font-medium text-foreground">Author</span>
         </span>
         <Input
-          id="embed-painting-author"
+          id="setting-painting-author"
           type="text"
           maxLength={64}
           value={author}

@@ -7,9 +7,8 @@ export function useDebouncedValue<T>(value: T, delay: number): [T, (next: T) => 
   const current = pending ?? value;
 
   useEffect(() => {
-    const id = timeoutRef.current;
     return () => {
-      if (id) clearTimeout(id);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
 

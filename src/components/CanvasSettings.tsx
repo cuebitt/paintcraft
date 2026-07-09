@@ -140,7 +140,7 @@ export function CanvasSettings({
           <span className="text-sm font-medium text-foreground">Cell Grid</span>
         </span>
         <Switch
-          id="embed-grid-toggle"
+          id="setting-grid-toggle"
           checked={showGrid}
           onCheckedChange={() => setShowGrid(!showGrid)}
         />
@@ -151,7 +151,7 @@ export function CanvasSettings({
           <span className="text-sm font-medium text-foreground">Transparency Grid</span>
         </span>
         <Switch
-          id="embed-transparency-toggle"
+          id="setting-transparency-toggle"
           checked={showTransparencyGrid}
           onCheckedChange={() => setShowTransparencyGrid(!showTransparencyGrid)}
         />

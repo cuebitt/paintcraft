@@ -15,14 +15,14 @@ import type { PaintingData } from "@/formats/paint-nbt";
 import { canvasToBlob, imageDataToBlob } from "@/lib/utils";
 import { dispatchError } from "@/lib/helpers";
 
-function sanitizeForFilename(s: string): string {
+export function sanitizeForFilename(s: string): string {
   return s
     .replace(/[^a-zA-Z0-9 _-]/g, "")
     .replace(/\s+/g, "_")
     .slice(0, 48);
 }
 
-function paintingDataToImageData(painting: PaintingData, canvas: CanvasType): ImageData {
+export function paintingDataToImageData(painting: PaintingData, canvas: CanvasType): ImageData {
   const data = new Uint8ClampedArray(canvas.width * canvas.height * 4);
   for (let i = 0; i < painting.pixels.length; i++) {
     const [r, g, b] = painting.pixels[i]!;
@@ -88,7 +88,7 @@ export function importPaintFile(file: File, workers: ImageProcessorWorkers) {
   reader.readAsArrayBuffer(file);
 }
 
-function quantizedToPixels(quantized: ImageData): [number, number, number][] {
+export function quantizedToPixels(quantized: ImageData): [number, number, number][] {
   const pixels: [number, number, number][] = [];
   for (let i = 0; i < quantized.data.length; i += 4) {
     pixels.push([quantized.data[i]!, quantized.data[i + 1]!, quantized.data[i + 2]!]);
@@ -96,7 +96,7 @@ function quantizedToPixels(quantized: ImageData): [number, number, number][] {
   return pixels;
 }
 
-async function encodeOriginalImage(
+export async function encodeOriginalImage(
   preprocessedData: ImageData | null,
 ): Promise<Uint8Array | undefined> {
   if (!preprocessedData) return;
@@ -112,7 +112,7 @@ async function encodeOriginalImage(
   }
 }
 
-function extractSidePixels(
+export function extractSidePixels(
   quantized: ImageData,
   width: number,
   height: number,
@@ -132,7 +132,7 @@ function extractSidePixels(
   ];
 }
 
-function generatePaintFilename(state: ReturnType<typeof useAppStore.getState>): string {
+export function generatePaintFilename(state: ReturnType<typeof useAppStore.getState>): string {
   if (state.author && state.title) {
     return `${sanitizeForFilename(state.author)}_${sanitizeForFilename(state.title)}.paint`;
   }

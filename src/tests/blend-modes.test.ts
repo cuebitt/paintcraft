@@ -181,7 +181,6 @@ describe("applyBlendMode", () => {
       128,
       opaque,
     );
-    // Implementation applies extra *255 scaling in alphaCompositing
     expect(r).toBe(32513);
   });
 
@@ -279,7 +278,6 @@ describe("applyBlendMode", () => {
     const result = applyBlendMode(AsepriteLayerBlendMode.Hue, 255, 0, 0, opaque, 0, 0, 255, opaque);
     expect(result).toHaveLength(4);
     expect(result[3]).toBe(opaque);
-    // Hue blending via HSL, output differs from simple RGB blend
     expect(result[0]).toBeGreaterThanOrEqual(0);
     expect(result[0]).toBeLessThanOrEqual(255);
   });
@@ -329,6 +327,35 @@ describe("applyBlendMode", () => {
       opaque,
     );
     expect(result).toHaveLength(4);
+    expect(result[3]).toBe(opaque);
+  });
+
+  it("returns 4 values", () => {
+    const result = applyBlendMode(
+      AsepriteLayerBlendMode.Normal,
+      100,
+      150,
+      200,
+      opaque,
+      50,
+      100,
+      150,
+      opaque,
+    );
+    expect(result).toHaveLength(4);
+  });
+
+  it("handles fully transparent source over opaque dest", () => {
+    const result = applyBlendMode(AsepriteLayerBlendMode.Normal, 255, 0, 0, 0, 0, 255, 0, opaque);
+    expect(result[0]).toBe(0);
+    expect(result[1]).toBe(255);
+    expect(result[2]).toBe(0);
+    expect(result[3]).toBe(opaque);
+  });
+
+  it("handles opaque source over fully transparent dest", () => {
+    const result = applyBlendMode(AsepriteLayerBlendMode.Normal, 255, 0, 0, opaque, 0, 255, 0, 0);
+    expect(result[0]).toBe(255);
     expect(result[3]).toBe(opaque);
   });
 });

@@ -3,6 +3,7 @@ import {
   writePaintFile,
   readPaintFile,
   getCanvasTypeIndex,
+  getCanvasTypeByNbtCt,
   detectFormat,
 } from "@/formats/paint-nbt";
 import type { PaintingData } from "@/formats/paint-nbt";
@@ -248,5 +249,51 @@ describe("detectFormat", () => {
       sidesActive: true,
     };
     expect(detectFormat(painting)).toBe("jop-2x");
+  });
+});
+
+describe("getCanvasTypeByNbtCt", () => {
+  it("maps ct 0 to 16x16", () => {
+    const result = getCanvasTypeByNbtCt(0);
+    expect(result.name).toBe("16x16");
+    expect(result.width).toBe(16);
+    expect(result.height).toBe(16);
+    expect(result.cellsX).toBe(1);
+    expect(result.cellsY).toBe(1);
+  });
+
+  it("maps ct 1 to 32x32", () => {
+    const result = getCanvasTypeByNbtCt(1);
+    expect(result.width).toBe(32);
+    expect(result.height).toBe(32);
+  });
+
+  it("maps ct 4 to 48x48", () => {
+    const result = getCanvasTypeByNbtCt(4);
+    expect(result.width).toBe(48);
+    expect(result.height).toBe(48);
+    expect(result.cellsX).toBe(3);
+    expect(result.cellsY).toBe(3);
+  });
+
+  it("maps ct 5 to 64x64", () => {
+    const result = getCanvasTypeByNbtCt(5);
+    expect(result.width).toBe(64);
+    expect(result.height).toBe(64);
+  });
+
+  it("roundtrips with getCanvasTypeIndex", () => {
+    for (let ct = 0; ct <= 9; ct++) {
+      const canvas = getCanvasTypeByNbtCt(ct);
+      expect(getCanvasTypeIndex(canvas)).toBe(ct);
+    }
+  });
+
+  it("throws for unknown ct", () => {
+    expect(() => getCanvasTypeByNbtCt(99)).toThrow("Unknown NBT canvas type: 99");
+  });
+
+  it("throws for negative ct", () => {
+    expect(() => getCanvasTypeByNbtCt(-1)).toThrow("Unknown NBT canvas type: -1");
   });
 });

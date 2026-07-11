@@ -49,9 +49,41 @@ describe("quantize", () => {
     }
   });
 
-  it("preserves the alpha channel", () => {
+  it("preserves the alpha channel with median-cut", () => {
     const data = new ImageData(new Uint8ClampedArray([128, 128, 128, 128]), 1, 1);
     const result = quantize(data, "median-cut");
     expect(result.quantized.data[3]).toBe(128);
+  });
+
+  it("handles a multi-color image", () => {
+    const colors = [
+      [255, 0, 0],
+      [0, 255, 0],
+      [0, 0, 255],
+      [255, 255, 0],
+    ] as [number, number, number][];
+    const data = makeImageData(colors, 2, 2);
+    const result = quantize(data, "median-cut");
+    expect(result.quantized.width).toBe(2);
+    expect(result.quantized.height).toBe(2);
+    expect(result.adaptivePalette.length).toBeGreaterThan(0);
+  });
+
+  it("handles a single-color image efficiently", () => {
+    const data = makeImageData([[128, 128, 128]], 1, 1);
+    const result = quantize(data, "median-cut", { colors: 1, includeFixedPalette: false });
+    expect(result.adaptivePalette.length).toBe(1);
+  });
+
+  it("handles transparent pixels with wuquant", () => {
+    const data = new ImageData(new Uint8ClampedArray([128, 0, 0, 0, 0, 255, 0, 128]), 1, 2);
+    const result = quantize(data, "wuquant");
+    expect(result.quantized.data.length).toBe(8);
+  });
+
+  it("handles transparent pixels with neuquant", () => {
+    const data = new ImageData(new Uint8ClampedArray([128, 0, 0, 0, 0, 255, 0, 128]), 1, 2);
+    const result = quantize(data, "neuquant");
+    expect(result.quantized.data.length).toBe(8);
   });
 });

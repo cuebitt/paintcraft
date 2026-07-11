@@ -25,6 +25,14 @@ describe("rgbToHex", () => {
   it("pads single-digit hex values", () => {
     expect(rgbToHex([1, 2, 3])).toBe("#010203");
   });
+
+  it("handles max values", () => {
+    expect(rgbToHex([255, 255, 255])).toBe("#ffffff");
+  });
+
+  it("handles zero values", () => {
+    expect(rgbToHex([0, 0, 0])).toBe("#000000");
+  });
 });
 
 describe("hexToRgb", () => {
@@ -69,6 +77,14 @@ describe("FIXED_PALETTE", () => {
       expect(b).toBeLessThanOrEqual(255);
     }
   });
+
+  it("first color is off-white", () => {
+    expect(FIXED_PALETTE[0]).toEqual([249, 255, 254]);
+  });
+
+  it("last color is near-black", () => {
+    expect(FIXED_PALETTE[15]).toEqual([29, 29, 33]);
+  });
 });
 
 describe("rgbaToHex", () => {
@@ -87,6 +103,14 @@ describe("rgbaToHex", () => {
   it("rounds alpha to nearest byte", () => {
     const result = rgbaToHex([128, 128, 128], 0.5);
     expect(result).toHaveLength(9);
+  });
+
+  it("handles very small alpha", () => {
+    expect(rgbaToHex([255, 0, 0], 0.01)).toBe("#ff000003");
+  });
+
+  it("handles alpha of 0.0039 (rounds to 1)", () => {
+    expect(rgbaToHex([255, 0, 0], 0.0039)).toBe("#ff000001");
   });
 });
 
@@ -115,5 +139,16 @@ describe("hexToRgba", () => {
     const result = hexToRgba("#00000000");
     expect(result.color).toEqual([0, 0, 0]);
     expect(result.alpha).toBe(0);
+  });
+
+  it("parses 8-char hex with full alpha", () => {
+    const result = hexToRgba("#ffffff80");
+    expect(result.alpha).toBeCloseTo(128 / 255);
+  });
+
+  it("handles 9-char hex by ignoring extra chars", () => {
+    const result = hexToRgba("#ff0000ff");
+    expect(result.color).toEqual([255, 0, 0]);
+    expect(result.alpha).toBe(1);
   });
 });

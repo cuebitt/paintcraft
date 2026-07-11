@@ -112,7 +112,6 @@ export function SettingsPanel() {
           glass={glass}
           showGrid={showGrid}
           showTransparencyGrid={showTransparencyGrid}
-          showTooltips={showTooltips}
           loading={loading}
           setCanvas={setCanvas}
           setPaddingColorPreview={setPaddingColorPreview}
@@ -127,7 +126,6 @@ export function SettingsPanel() {
           resizeFilter={resizeFilter}
           resizeSharpenLocal={sharpenLocal}
           fitMode={fitMode}
-          showTooltips={showTooltips}
           loading={loading}
           setResizeFilter={setResizeFilter}
           handleSharpenChange={onSharpen}
@@ -142,7 +140,6 @@ export function SettingsPanel() {
           quantMethod={quantMethod}
           colorCountLocal={colorCountLocal}
           includeFixedPalette={includeFixedPalette}
-          showTooltips={showTooltips}
           loading={loading}
           setQuantizationEnabled={setQuantizationEnabled}
           setQuantMethod={setQuantMethod}
@@ -160,7 +157,6 @@ export function SettingsPanel() {
           embedOriginalImage={embedOriginalImage}
           title={title}
           author={author}
-          showTooltips={showTooltips}
           loading={loading}
           setPaintFormat={setPaintFormat}
           setGlass={setGlass}

@@ -7,7 +7,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { SettingRow } from "@/components/SettingRow";
 import type { QuantMethod } from "@/core/quantize";
 import { HashIcon, SparklesIcon, SwatchBookIcon } from "lucide-react";
 
@@ -22,7 +22,6 @@ type QuantizationSettingsProps = {
   quantMethod: QuantMethod;
   colorCountLocal: number;
   includeFixedPalette: boolean;
-  showTooltips: boolean;
   loading: boolean;
   setQuantizationEnabled: (enabled: boolean) => void;
   setQuantMethod: (method: QuantMethod) => void;
@@ -35,7 +34,6 @@ export function QuantizationSettings({
   quantMethod,
   colorCountLocal,
   includeFixedPalette,
-  showTooltips,
   loading,
   setQuantizationEnabled,
   setQuantMethod,
@@ -44,48 +42,24 @@ export function QuantizationSettings({
 }: QuantizationSettingsProps) {
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex min-h-9 items-center justify-between gap-2">
-        <Tooltip disabled={!showTooltips}>
-          <TooltipTrigger
-            render={
-              <button
-                type="button"
-                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
-              >
-                <SparklesIcon className="size-4 shrink-0 text-accent" />
-                Quantize
-              </button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={8}>
-            Enable or disable color quantization
-          </TooltipContent>
-        </Tooltip>
+      <SettingRow
+        icon={SparklesIcon}
+        label="Quantize"
+        tooltip="Enable or disable color quantization"
+      >
         <Switch
           id="setting-quantization-toggle"
           checked={quantizationEnabled}
           onCheckedChange={() => setQuantizationEnabled(!quantizationEnabled)}
           disabled={loading}
         />
-      </div>
+      </SettingRow>
 
-      <div className="flex min-h-9 items-center justify-between gap-2">
-        <Tooltip disabled={!showTooltips}>
-          <TooltipTrigger
-            render={
-              <button
-                type="button"
-                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
-              >
-                <SparklesIcon className="size-4 shrink-0 text-accent" />
-                Method
-              </button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={8}>
-            Algorithm used for color quantization
-          </TooltipContent>
-        </Tooltip>
+      <SettingRow
+        icon={SparklesIcon}
+        label="Method"
+        tooltip="Algorithm used for color quantization"
+      >
         <Select
           value={quantMethod}
           onValueChange={(v) => setQuantMethod(v as QuantMethod)}
@@ -106,25 +80,13 @@ export function QuantizationSettings({
             </SelectGroup>
           </SelectContent>
         </Select>
-      </div>
+      </SettingRow>
 
-      <div className="flex min-h-9 items-center justify-between gap-2">
-        <Tooltip disabled={!showTooltips}>
-          <TooltipTrigger
-            render={
-              <button
-                type="button"
-                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
-              >
-                <HashIcon className="size-4 shrink-0 text-accent" />
-                Color Count
-              </button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={8}>
-            Number of adaptive colors to extract (1–256)
-          </TooltipContent>
-        </Tooltip>
+      <SettingRow
+        icon={HashIcon}
+        label="Color Count"
+        tooltip="Number of adaptive colors to extract (1–256)"
+      >
         <Input
           id="setting-adaptive-colors"
           type="number"
@@ -140,32 +102,20 @@ export function QuantizationSettings({
           disabled={loading || !quantizationEnabled}
           className="w-20"
         />
-      </div>
+      </SettingRow>
 
-      <div className="flex min-h-9 items-center justify-between gap-2">
-        <Tooltip disabled={!showTooltips}>
-          <TooltipTrigger
-            render={
-              <button
-                type="button"
-                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
-              >
-                <SwatchBookIcon className="size-4 shrink-0 text-accent" />
-                Fixed Palette
-              </button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={8}>
-            Merges Minecraft's 16-color palette with the adaptive colors
-          </TooltipContent>
-        </Tooltip>
+      <SettingRow
+        icon={SwatchBookIcon}
+        label="Fixed Palette"
+        tooltip="Merges Minecraft's 16-color palette with the adaptive colors"
+      >
         <Switch
           id="setting-fixed-palette-toggle"
           checked={includeFixedPalette}
           onCheckedChange={() => setIncludeFixedPalette(!includeFixedPalette)}
           disabled={loading || !quantizationEnabled}
         />
-      </div>
+      </SettingRow>
     </div>
   );
 }

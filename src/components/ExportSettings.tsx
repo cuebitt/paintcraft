@@ -7,7 +7,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { SettingRow } from "@/components/SettingRow";
 import type { PaintFormat } from "@/types";
 import { PAINT_FORMATS } from "@/types";
 import {
@@ -28,7 +28,6 @@ type ExportSettingsProps = {
   embedOriginalImage: boolean;
   title: string;
   author: string;
-  showTooltips: boolean;
   loading: boolean;
   setPaintFormat: (format: PaintFormat) => void;
   setGlass: (glass: boolean) => void;
@@ -47,7 +46,6 @@ export function ExportSettings({
   embedOriginalImage,
   title,
   author,
-  showTooltips,
   loading,
   setPaintFormat,
   setGlass,
@@ -59,23 +57,11 @@ export function ExportSettings({
 }: ExportSettingsProps) {
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex min-h-9 items-center justify-between gap-2">
-        <Tooltip disabled={!showTooltips}>
-          <TooltipTrigger
-            render={
-              <button
-                type="button"
-                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
-              >
-                <FileIcon className="size-4 shrink-0 text-accent" />
-                Format
-              </button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={8}>
-            {PAINT_FORMATS.find((f) => f.value === paintFormat)?.description}
-          </TooltipContent>
-        </Tooltip>
+      <SettingRow
+        icon={FileIcon}
+        label="Format"
+        tooltip={PAINT_FORMATS.find((f) => f.value === paintFormat)?.description ?? ""}
+      >
         <Select
           value={paintFormat}
           onValueChange={(v) => setPaintFormat(v as PaintFormat)}
@@ -96,125 +82,61 @@ export function ExportSettings({
             </SelectGroup>
           </SelectContent>
         </Select>
-      </div>
+      </SettingRow>
 
-      <div className="flex min-h-9 items-center justify-between gap-2">
-        <Tooltip disabled={!showTooltips}>
-          <TooltipTrigger
-            render={
-              <button
-                type="button"
-                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
-              >
-                <GlassWaterIcon className="size-4 shrink-0 text-accent" />
-                Glass Canvas
-              </button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={8}>
-            Enables transparency on the canvas padding
-          </TooltipContent>
-        </Tooltip>
+      <SettingRow
+        icon={GlassWaterIcon}
+        label="Glass Canvas"
+        tooltip="Enables transparency on the canvas padding"
+      >
         <Switch
           id="setting-glass-toggle"
           checked={glass}
           onCheckedChange={() => setGlass(!glass)}
           disabled={loading || paintFormat !== "jop-2x"}
         />
-      </div>
+      </SettingRow>
 
-      <div className="flex min-h-9 items-center justify-between gap-2">
-        <Tooltip disabled={!showTooltips}>
-          <TooltipTrigger
-            render={
-              <button
-                type="button"
-                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
-              >
-                <BoxIcon className="size-4 shrink-0 text-accent" />
-                Paint Sides
-              </button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={8}>
-            Paint the block sides with edge colors (jop-2x only)
-          </TooltipContent>
-        </Tooltip>
+      <SettingRow
+        icon={BoxIcon}
+        label="Paint Sides"
+        tooltip="Paint the block sides with edge colors (jop-2x only)"
+      >
         <Switch
           id="setting-sides-toggle"
           checked={sidesActive}
           onCheckedChange={() => setSidesActive(!sidesActive)}
           disabled={loading || paintFormat !== "jop-2x"}
         />
-      </div>
+      </SettingRow>
 
-      <div className="flex min-h-9 items-center justify-between gap-2">
-        <Tooltip disabled={!showTooltips}>
-          <TooltipTrigger
-            render={
-              <button
-                type="button"
-                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
-              >
-                <PenIcon className="size-4 shrink-0 text-accent" />
-                Signed
-              </button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={8}>
-            Adds author name and title metadata to the .paint file
-          </TooltipContent>
-        </Tooltip>
+      <SettingRow
+        icon={PenIcon}
+        label="Signed"
+        tooltip="Adds author name and title metadata to the .paint file"
+      >
         <Switch
           id="setting-signed-toggle"
           checked={signed}
           onCheckedChange={() => setSigned(!signed)}
           disabled={loading}
         />
-      </div>
+      </SettingRow>
 
-      <div className="flex min-h-9 items-center justify-between gap-2">
-        <Tooltip disabled={!showTooltips}>
-          <TooltipTrigger
-            render={
-              <button
-                type="button"
-                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
-              >
-                <PaperclipIcon className="size-4 shrink-0 text-accent" />
-                Embed Original
-              </button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={8}>
-            Embeds the original image for round-trip editing
-          </TooltipContent>
-        </Tooltip>
+      <SettingRow
+        icon={PaperclipIcon}
+        label="Embed Original"
+        tooltip="Embeds the original image for round-trip editing"
+      >
         <Switch
           id="setting-embed-original-toggle"
           checked={embedOriginalImage}
           onCheckedChange={() => setEmbedOriginalImage(!embedOriginalImage)}
           disabled={loading}
         />
-      </div>
+      </SettingRow>
 
-      <div className="flex min-h-9 items-center justify-between gap-2">
-        <Tooltip disabled={!showTooltips}>
-          <TooltipTrigger
-            render={
-              <button
-                type="button"
-                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
-              >
-                <TypeIcon className="size-4 shrink-0 text-accent" />
-                Title
-              </button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={8}>
-            Painting title (requires Signed toggle)
-          </TooltipContent>
-        </Tooltip>
+      <SettingRow icon={TypeIcon} label="Title" tooltip="Painting title (requires Signed toggle)">
         <Input
           id="setting-painting-title"
           maxLength={64}
@@ -224,25 +146,9 @@ export function ExportSettings({
           placeholder="Painting title"
           className="w-36"
         />
-      </div>
+      </SettingRow>
 
-      <div className="flex min-h-9 items-center justify-between gap-2">
-        <Tooltip disabled={!showTooltips}>
-          <TooltipTrigger
-            render={
-              <button
-                type="button"
-                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
-              >
-                <UserIcon className="size-4 shrink-0 text-accent" />
-                Author
-              </button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={8}>
-            Author name (requires Signed toggle)
-          </TooltipContent>
-        </Tooltip>
+      <SettingRow icon={UserIcon} label="Author" tooltip="Author name (requires Signed toggle)">
         <Input
           id="setting-painting-author"
           maxLength={64}
@@ -252,7 +158,7 @@ export function ExportSettings({
           placeholder="Author name"
           className="w-36"
         />
-      </div>
+      </SettingRow>
     </div>
   );
 }

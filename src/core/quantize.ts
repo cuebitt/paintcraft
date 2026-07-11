@@ -20,6 +20,10 @@ interface QuantizeResult {
   adaptivePalette: readonly RGB[];
 }
 
+const setAlpha = (data: Uint8ClampedArray, i: number, alpha: number) => {
+  data[i * 4 + 3] = alpha;
+};
+
 const DITHER: ImageQuantization = "floyd-steinberg";
 const DISTANCE: ColorDistanceFormula = "cie94-graphic-arts";
 const MEDIAN_CUT: PaletteQuantization = "rgbquant";
@@ -105,7 +109,7 @@ function quantizeImage(
   const quantized = pointContainerToImageData(outPC);
   if (alpha) {
     for (let i = 0; i < alpha.length; i++) {
-      quantized.data[i * 4 + 3] = alpha[i]!;
+      setAlpha(quantized.data, i, alpha[i]!);
     }
   }
 

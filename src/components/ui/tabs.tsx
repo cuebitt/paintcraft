@@ -68,7 +68,7 @@ function TabsContent({ className, ...props }: TabsPrimitive.Panel.Props) {
     // @ts-expect-error -- preact/react type mismatch for @base-ui/react props
     <TabsPrimitive.Panel
       data-slot="tabs-content"
-      className={cn("flex-1 text-sm outline-none", className)}
+      className={cn("flex-1 overflow-hidden text-sm outline-none", className)}
       {...props}
     />
   );

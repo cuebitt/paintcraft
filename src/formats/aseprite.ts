@@ -7,6 +7,10 @@ import {
 } from "@pixelation/aseprite";
 import { applyBlendMode } from "@/formats/blend-modes";
 
+const HEADER_SIZE = 128;
+const FRAME_MAGIC = 0xf1fa;
+const LAYER_CHUNK_TYPE = 0x2004;
+
 interface AsepriteData {
   width: number;
   height: number;
@@ -54,7 +58,7 @@ function readStringAt(buf: ArrayBuffer, offset: number): { value: string; bytesR
 }
 
 function parseLayerMetadata(buf: ArrayBuffer): RawLayerMeta[] {
-  const headerSize = 128;
+  const headerSize = HEADER_SIZE;
   let cursor = headerSize;
   const totalSize = buf.byteLength;
 
@@ -63,7 +67,7 @@ function parseLayerMetadata(buf: ArrayBuffer): RawLayerMeta[] {
   cursor += 4; // frame size
   const frameMagic = readLeU16(buf, cursor);
   cursor += 2;
-  if (frameMagic !== 0xf1fa) return [];
+  if (frameMagic !== FRAME_MAGIC) return [];
 
   const chunkCount = readLeU16(buf, cursor);
   cursor += 2;
@@ -79,7 +83,7 @@ function parseLayerMetadata(buf: ArrayBuffer): RawLayerMeta[] {
     const chunkSize = readLeU32(buf, cursor);
     const chunkType = readLeU16(buf, cursor + 4);
 
-    if (chunkType === 0x2004) {
+    if (chunkType === LAYER_CHUNK_TYPE) {
       let p = cursor + 6;
       const flags = readLeU16(buf, p);
       p += 2;
@@ -216,6 +220,69 @@ function getPixelColor(
   return [0, 0, 0, 0];
 }
 
+function writePixel(
+  data: Uint8ClampedArray,
+  index: number,
+  r: number,
+  g: number,
+  b: number,
+  a: number,
+) {
+  data[index] = r;
+  data[index + 1] = g;
+  data[index + 2] = b;
+  data[index + 3] = Math.round(a * 255);
+}
+
+function compositeCel(
+  data: Uint8ClampedArray,
+  cel: AsepriteCel,
+  width: number,
+  height: number,
+  depth: AsepriteColorDepth,
+  palette: Record<number | string, { red: number; green: number; blue: number; alpha: number }>,
+  blendMode: AsepriteLayerBlendMode,
+  layerOpacity: number,
+) {
+  for (let cy = 0; cy < cel.height; cy++) {
+    for (let cx = 0; cx < cel.width; cx++) {
+      const pixelIndex = cy * cel.width + cx;
+      const pixel = cel.pixels[pixelIndex];
+      if (pixel === undefined) continue;
+
+      const [r, g, b, a] = getPixelColor(pixel, depth, palette);
+
+      const celOpacity = cel.opacity / 255;
+      const finalOpacity = (a / 255) * celOpacity * layerOpacity;
+      if (finalOpacity <= 0) continue;
+
+      const targetX = cel.x + cx;
+      const targetY = cel.y + cy;
+      if (targetX < 0 || targetX >= width || targetY < 0 || targetY >= height) continue;
+
+      const targetIndex = (targetY * width + targetX) * 4;
+      const dstR = data[targetIndex]!;
+      const dstG = data[targetIndex + 1]!;
+      const dstB = data[targetIndex + 2]!;
+      const dstA = data[targetIndex + 3]! / 255;
+
+      const [outR, outG, outB, outA] = applyBlendMode(
+        blendMode,
+        r,
+        g,
+        b,
+        finalOpacity,
+        dstR,
+        dstG,
+        dstB,
+        dstA,
+      );
+
+      writePixel(data, targetIndex, outR, outG, outB, outA);
+    }
+  }
+}
+
 function compositeLayers(
   layers: FlattenedLayer[],
   width: number,
@@ -225,56 +292,11 @@ function compositeLayers(
 ): Uint8ClampedArray {
   const data = new Uint8ClampedArray(width * height * 4);
 
-  const visibleLayers = layers.filter((l) => l.visible && l.cels.length > 0);
-
-  for (const layer of visibleLayers) {
+  for (const layer of layers) {
+    if (!layer.visible) continue;
     for (const cel of layer.cels) {
       if (!cel.pixels || cel.pixels.length === 0) continue;
-
-      const layerOpacity = layer.opacity;
-
-      for (let cy = 0; cy < cel.height; cy++) {
-        for (let cx = 0; cx < cel.width; cx++) {
-          const pixelIndex = cy * cel.width + cx;
-          const pixel = cel.pixels[pixelIndex];
-          if (pixel === undefined) continue;
-
-          const [r, g, b, a] = getPixelColor(pixel, depth, palette);
-
-          const celOpacity = cel.opacity / 255;
-          const finalOpacity = (a / 255) * celOpacity * layerOpacity;
-
-          if (finalOpacity <= 0) continue;
-
-          const targetX = cel.x + cx;
-          const targetY = cel.y + cy;
-
-          if (targetX < 0 || targetX >= width || targetY < 0 || targetY >= height) continue;
-
-          const targetIndex = (targetY * width + targetX) * 4;
-          const dstR = data[targetIndex]!;
-          const dstG = data[targetIndex + 1]!;
-          const dstB = data[targetIndex + 2]!;
-          const dstA = data[targetIndex + 3]! / 255;
-
-          const [outR, outG, outB, outA] = applyBlendMode(
-            layer.blendMode,
-            r,
-            g,
-            b,
-            finalOpacity,
-            dstR!,
-            dstG,
-            dstB,
-            dstA,
-          );
-
-          data[targetIndex] = outR;
-          data[targetIndex + 1] = outG;
-          data[targetIndex + 2] = outB;
-          data[targetIndex + 3] = Math.round(outA * 255);
-        }
-      }
+      compositeCel(data, cel, width, height, depth, palette, layer.blendMode, layer.opacity);
     }
   }
 
@@ -301,10 +323,7 @@ function readAsepriteFileFromBuffer(data: ArrayBuffer): AsepriteData {
     throw new Error("Aseprite file contains no frames");
   }
 
-  const firstFrame = sprite.frames[0];
-  if (!firstFrame) {
-    throw new Error("Aseprite file contains no frames");
-  }
+  const firstFrame = sprite.frames[0]!;
 
   const rawLayers = parseLayerMetadata(data);
   const layerTree = buildLayerTree(rawLayers, firstFrame.layers, 0);

@@ -5,6 +5,21 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export async function canvasToBlob(
+  canvas: HTMLCanvasElement | OffscreenCanvas,
+  mimeType = "image/png",
+): Promise<Blob> {
+  if (canvas instanceof OffscreenCanvas) {
+    return canvas.convertToBlob({ type: mimeType });
+  }
+  return new Promise<Blob>((resolve, reject) => {
+    (canvas as HTMLCanvasElement).toBlob((blob) => {
+      if (blob) resolve(blob);
+      else reject(new Error(`Failed to create ${mimeType} blob`));
+    }, mimeType);
+  });
+}
+
 export function imageDataToBlob(imageData: ImageData): Promise<Blob> {
   const canvas = new OffscreenCanvas(imageData.width, imageData.height);
   const ctx = canvas.getContext("2d");

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vite-plus/test";
-import { useAppStore, getProcessImageArgs } from "@/app/store";
+import { useAppStore, getProcessImageOptions } from "@/app/store";
 import { CANVAS_TYPES } from "@/types";
 
 function temporal() {
@@ -223,30 +223,32 @@ describe("appStore", () => {
   });
 });
 
-describe("getProcessImageArgs", () => {
-  it("returns correct args tuple", () => {
+describe("getProcessImageOptions", () => {
+  it("returns correct options object", () => {
     useAppStore.getState().reset();
     const s = useAppStore.getState();
-    const args = getProcessImageArgs(s);
-    expect(args).toHaveLength(8);
-    expect(args[0]).toBe(s.selectedCanvas);
-    expect(args[1]).toBe(s.quantMethod);
-    expect(args[2]).toBe(s.fitMode);
-    expect(args[3]).toEqual(s.paddingColor);
-    expect(args[4]).toBe(s.quantizationEnabled);
-    expect(args[5]).toEqual({
+    const options = getProcessImageOptions(s);
+    expect(options.canvas).toBe(s.selectedCanvas);
+    expect(options.method).toBe(s.quantMethod);
+    expect(options.fitMode).toBe(s.fitMode);
+    expect(options.padding).toEqual(s.paddingColor);
+    expect(options.quantEnabled).toBe(s.quantizationEnabled);
+    expect(options.quantOptions).toEqual({
       colors: s.adaptiveColorCount,
       includeFixedPalette: s.includeFixedPalette,
     });
-    expect(args[6]).toEqual({ filter: s.resizeFilter, unsharpAmount: s.unsharpAmount });
-    expect(args[7]).toBe(1);
+    expect(options.resizeOptions).toEqual({
+      filter: s.resizeFilter,
+      unsharpAmount: s.unsharpAmount,
+    });
+    expect(options.paddingAlpha).toBe(1);
   });
 
   it("returns paddingAlpha when glass is enabled", () => {
     useAppStore.getState().setGlass(true);
     useAppStore.getState().setPaddingAlpha(0.3);
     const s = useAppStore.getState();
-    const args = getProcessImageArgs(s);
-    expect(args[7]).toBe(0.3);
+    const options = getProcessImageOptions(s);
+    expect(options.paddingAlpha).toBe(0.3);
   });
 });

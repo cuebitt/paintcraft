@@ -6,7 +6,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { SettingRow } from "@/components/SettingRow";
 import { Button } from "@/components/ui/button";
 import type { ResizeFilter } from "@/core/preprocess";
 import type { ImageFitMode } from "@/types";
@@ -26,7 +26,6 @@ type ResizeSettingsProps = {
   resizeFilter: ResizeFilter;
   resizeSharpenLocal: number;
   fitMode: ImageFitMode;
-  showTooltips: boolean;
   loading: boolean;
   setResizeFilter: (filter: ResizeFilter) => void;
   handleSharpenChange: (val: number) => void;
@@ -38,7 +37,6 @@ export function ResizeSettings({
   resizeFilter,
   resizeSharpenLocal,
   fitMode,
-  showTooltips,
   loading,
   setResizeFilter,
   handleSharpenChange,
@@ -47,23 +45,11 @@ export function ResizeSettings({
 }: ResizeSettingsProps) {
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex min-h-9 items-center justify-between gap-2">
-        <Tooltip disabled={!showTooltips}>
-          <TooltipTrigger
-            render={
-              <button
-                type="button"
-                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
-              >
-                <ScalingIcon className="size-4 shrink-0 text-accent" />
-                Resize Filter
-              </button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={8}>
-            Algorithm used when resizing the image to fit the canvas
-          </TooltipContent>
-        </Tooltip>
+      <SettingRow
+        icon={ScalingIcon}
+        label="Resize Filter"
+        tooltip="Algorithm used when resizing the image to fit the canvas"
+      >
         <Select
           value={resizeFilter}
           onValueChange={(v) => setResizeFilter(v as ResizeFilter)}
@@ -84,25 +70,9 @@ export function ResizeSettings({
             </SelectGroup>
           </SelectContent>
         </Select>
-      </div>
+      </SettingRow>
 
-      <div className="flex min-h-9 items-center justify-between gap-2">
-        <Tooltip disabled={!showTooltips}>
-          <TooltipTrigger
-            render={
-              <button
-                type="button"
-                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
-              >
-                <WandIcon className="size-4 shrink-0 text-accent" />
-                Sharpen
-              </button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={8}>
-            Sharpen Strength
-          </TooltipContent>
-        </Tooltip>
+      <SettingRow icon={WandIcon} label="Sharpen" tooltip="Sharpen Strength">
         <div className="flex min-w-35 flex-1 items-center gap-2">
           <Slider
             min={0}
@@ -117,25 +87,13 @@ export function ResizeSettings({
           />
           <span className="w-8 text-right text-xs text-muted-foreground">{resizeSharpenLocal}</span>
         </div>
-      </div>
+      </SettingRow>
 
-      <div className="flex min-h-9 items-center justify-between gap-2">
-        <Tooltip disabled={!showTooltips}>
-          <TooltipTrigger
-            render={
-              <button
-                type="button"
-                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
-              >
-                <Maximize2Icon className="size-4 shrink-0 text-accent" />
-                Fit Mode
-              </button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={8}>
-            How the image fits within the canvas dimensions
-          </TooltipContent>
-        </Tooltip>
+      <SettingRow
+        icon={Maximize2Icon}
+        label="Fit Mode"
+        tooltip="How the image fits within the canvas dimensions"
+      >
         <Select
           value={fitMode}
           onValueChange={(v) => setFitMode(v as ImageFitMode)}
@@ -156,38 +114,19 @@ export function ResizeSettings({
             </SelectGroup>
           </SelectContent>
         </Select>
-      </div>
+      </SettingRow>
 
       <div className="flex min-h-9 items-center justify-between gap-2">
-        <Tooltip disabled={!showTooltips}>
-          <TooltipTrigger
-            render={
-              <button
-                type="button"
-                className="flex cursor-default items-center gap-2 text-sm font-medium text-foreground"
-              >
-                <RefreshCwIcon className="size-4 shrink-0 text-accent" />
-                Reprocess
-              </button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={8}>
-            Re-runs image processing. This action cannot be undone.
-          </TooltipContent>
-        </Tooltip>
-        <Tooltip disabled={!showTooltips}>
-          <TooltipTrigger
-            render={
-              <Button variant="outline" size="sm" disabled={loading} onClick={onReprocess}>
-                <RefreshCwIcon className="size-3.5" />
-                Refresh
-              </Button>
-            }
-          />
-          <TooltipContent side="bottom" sideOffset={8}>
-            Cannot be undone
-          </TooltipContent>
-        </Tooltip>
+        <SettingRow
+          icon={RefreshCwIcon}
+          label="Reprocess"
+          tooltip="Re-runs image processing. This action cannot be undone."
+        >
+          <Button variant="outline" size="sm" disabled={loading} onClick={onReprocess}>
+            <RefreshCwIcon className="size-3.5" />
+            Refresh
+          </Button>
+        </SettingRow>
       </div>
     </div>
   );

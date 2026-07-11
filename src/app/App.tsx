@@ -14,8 +14,12 @@ import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
 import { useClipboard } from "@/hooks/useClipboard";
 import { resolveImageParam } from "@/hooks/useEmbedMode";
 import { preprocessImageForCanvas } from "@/core/preprocess";
-import { useAppStore, getProcessImageArgs } from "@/app/store";
+import { detectEmbedMode } from "@/lib/embed";
+import { useAppStore, getProcessImageOptions } from "@/app/store";
 import { dispatchError } from "@/lib/helpers";
+import type { CanvasType, ImageFitMode } from "@/types";
+import type { RGB } from "@/core/palette";
+import type { QuantMethod, QuantizeOptions } from "@/core/quantize";
 
 const toggleGrid = () => {
   useAppStore.getState().setShowGrid(!useAppStore.getState().showGrid);
@@ -27,32 +31,68 @@ const toggleQuantize = () => {
 
 const handleReset = () => useAppStore.getState().reset();
 
+function postDisplayMessage(
+  worker: Worker,
+  imageBitmap: ImageBitmap,
+  canvas: CanvasType,
+  mode: ImageFitMode,
+  padding: RGB,
+  paddingAlpha?: number,
+) {
+  worker.postMessage({
+    type: "display",
+    imageBitmap,
+    canvasWidth: canvas.width,
+    canvasHeight: canvas.height,
+    fitMode: mode,
+    paddingColor: padding,
+    paddingAlpha,
+  });
+}
+
+function postQuantizeMessage(
+  worker: Worker,
+  preprocessedData: ImageData,
+  method: QuantMethod,
+  quantOptions: QuantizeOptions,
+) {
+  worker.postMessage(
+    {
+      type: "quantize" as const,
+      imageData: {
+        data: preprocessedData.data,
+        width: preprocessedData.width,
+        height: preprocessedData.height,
+      },
+      method,
+      options: quantOptions,
+    },
+    [preprocessedData.data.buffer],
+  );
+}
+
 function App() {
   const state = useAppStore();
   const { undo, redo } = useAppStore.temporal.getState();
   const [showOriginal, { toggle: toggleOrig }] = useDisclosure(false);
 
-  const isEmbedded =
-    typeof window !== "undefined" &&
-    (window.self !== window.top ||
-      window.location.pathname.includes("embed") ||
-      new URLSearchParams(window.location.search).has("embed"));
+  const isEmbedded = detectEmbedMode();
 
   const { startTimer, endTimer } = usePerformanceMonitor();
 
   const processImage = useCallback<ProcessImageFn>(
-    async (
-      img,
-      canvas,
-      method,
-      mode,
-      padding,
-      quantEnabled,
-      quantOptions,
-      resizeOptions,
-      paddingAlpha,
-    ) => {
+    async (img, options) => {
       try {
+        const {
+          canvas,
+          fitMode: mode,
+          method,
+          padding,
+          quantEnabled,
+          quantOptions,
+          resizeOptions,
+          paddingAlpha,
+        } = options;
         const workers = workersRef.current;
         if (!workers?.workerRef.current) {
           dispatchError(new Error("Image processor not ready"), "Image processor not ready");
@@ -61,7 +101,7 @@ function App() {
 
         workers.pendingProcessRef.current = {
           displayDataUrl: "",
-          method,
+          method: options.method,
           quantEnabled,
           quantOptions,
         };
@@ -77,28 +117,17 @@ function App() {
         workers.preprocessedDataRef.current = preprocessedData;
 
         const displayBitmap = await createImageBitmap(img);
-        workers.workerRef.current.postMessage({
-          type: "display",
-          imageBitmap: displayBitmap,
-          canvasWidth: canvas.width,
-          canvasHeight: canvas.height,
-          fitMode: mode,
-          paddingColor: padding,
+        postDisplayMessage(
+          workers.workerRef.current,
+          displayBitmap,
+          canvas,
+          mode,
+          padding,
           paddingAlpha,
-        });
+        );
 
         if (quantEnabled) {
-          const msg = {
-            type: "quantize" as const,
-            imageData: {
-              data: preprocessedData.data,
-              width: preprocessedData.width,
-              height: preprocessedData.height,
-            },
-            method,
-            options: quantOptions,
-          };
-          workers.workerRef.current.postMessage(msg, [preprocessedData.data.buffer]);
+          postQuantizeMessage(workers.workerRef.current, preprocessedData, method, quantOptions);
         } else {
           workers.quantizedDataRef.current = { quantized: preprocessedData, adaptivePalette: [] };
           workers.pendingResultRef.current = {
@@ -168,7 +197,7 @@ function App() {
         useAppStore.getState().setLoading(true);
         const s = useAppStore.getState();
         startTimer("process-image");
-        void processImage(workers.originalImageRef.current, ...getProcessImageArgs(s));
+        void processImage(workers.originalImageRef.current, getProcessImageOptions(s));
       }
     }, 50);
     return () => {

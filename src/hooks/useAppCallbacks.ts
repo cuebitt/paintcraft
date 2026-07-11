@@ -1,8 +1,26 @@
 import { useCallback, useRef } from "preact/hooks";
 import type { ProcessImageFn, ImageProcessorWorkers } from "@/hooks/useImageProcessor";
-import { useAppStore, getProcessImageArgs } from "@/app/store";
+import { useAppStore, getProcessImageOptions } from "@/app/store";
 import { importPaintFile, exportPaintFile, exportPng } from "@/lib/file-io";
 import { dispatchError } from "@/lib/helpers";
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error(`Failed to read ${file.name}`));
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadImageFromDataUrl(url: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Failed to load image"));
+    img.src = url;
+  });
+}
 
 const IMPORT_HANDLERS: Record<
   string,
@@ -79,24 +97,17 @@ export function useAppCallbacks(processImage: ProcessImageFn, workers: ImageProc
       useAppStore.temporal.getState().pause();
       workersRef.current.clearTemporalOnNextResult.current = true;
       useAppStore.getState().setLoading(true);
-      const reader = new FileReader();
-      reader.onload = () => {
-        const img = new Image();
-        img.onload = () => {
+      void readFileAsDataUrl(file)
+        .then(async (dataUrl) => {
+          const img = await loadImageFromDataUrl(dataUrl);
           workersRef.current.originalImageRef.current = img;
-          useAppStore.getState().setOriginal(reader.result as string);
+          useAppStore.getState().setOriginal(dataUrl);
           const s = useAppStore.getState();
-          void processImageRef.current(img, ...getProcessImageArgs(s));
-        };
-        img.onerror = () => {
-          dispatchError(new Error(`Failed to load ${file.name}`), `Failed to load ${file.name}`);
-        };
-        img.src = reader.result as string;
-      };
-      reader.onerror = () => {
-        dispatchError(new Error(`Failed to read ${file.name}`), `Failed to read ${file.name}`);
-      };
-      reader.readAsDataURL(file);
+          void processImageRef.current(img, getProcessImageOptions(s));
+        })
+        .catch((err) => {
+          dispatchError(err, `Failed to load ${file.name}`);
+        });
     },
     [handleImportPaintFile, readIntoWorker],
   );

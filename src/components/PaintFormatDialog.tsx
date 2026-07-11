@@ -32,7 +32,7 @@ export function PaintFormatDialog() {
         <FileTextIcon data-icon="inline-start" />
         File format
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>.paint File Format</DialogTitle>
           <DialogDescription>

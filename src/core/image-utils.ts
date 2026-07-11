@@ -20,6 +20,28 @@ export function computeScale(
   return Math.min(targetWidth / imageWidth, targetHeight / imageHeight);
 }
 
+export function computeDisplayDimensions(
+  imgW: number,
+  imgH: number,
+  canvasWidth: number,
+  canvasHeight: number,
+  fitMode: ImageFitMode,
+): { width: number; height: number } {
+  const targetRatio = canvasWidth / canvasHeight;
+  const imageRatio = imgW / imgH;
+
+  if (fitMode === "width") {
+    return { width: imgW, height: Math.round(imgW / targetRatio) };
+  }
+  if (fitMode === "height") {
+    return { width: Math.round(imgH * targetRatio), height: imgH };
+  }
+  if (imageRatio > targetRatio) {
+    return { width: imgW, height: Math.round(imgW / targetRatio) };
+  }
+  return { width: Math.round(imgH * targetRatio), height: imgH };
+}
+
 export interface ErrorResponse {
   type: "error";
   message: string;

@@ -3,6 +3,7 @@ import type { RGB } from "./palette";
 import type { ImageFitMode } from "../types";
 import {
   computeScale,
+  computeDisplayDimensions,
   rgbString,
   type ErrorResponse,
   type SerializedImageData,
@@ -45,27 +46,14 @@ function handleDisplay(msg: DisplayRequest): DisplayResponse {
 
   const imgW = imageBitmap.width;
   const imgH = imageBitmap.height;
-  const targetRatio = canvasWidth / canvasHeight;
-  const imageRatio = imgW / imgH;
 
-  let dw: number;
-  let dh: number;
-
-  if (fitMode === "width") {
-    dw = imgW;
-    dh = Math.round(imgW / targetRatio);
-  } else if (fitMode === "height") {
-    dh = imgH;
-    dw = Math.round(imgH * targetRatio);
-  } else {
-    if (imageRatio > targetRatio) {
-      dw = imgW;
-      dh = Math.round(imgW / targetRatio);
-    } else {
-      dh = imgH;
-      dw = Math.round(imgH * targetRatio);
-    }
-  }
+  const { width: dw, height: dh } = computeDisplayDimensions(
+    imgW,
+    imgH,
+    canvasWidth,
+    canvasHeight,
+    fitMode,
+  );
 
   const scale = computeScale(imgW, imgH, dw, dh, fitMode);
   const scaledWidth = Math.round(imgW * scale);

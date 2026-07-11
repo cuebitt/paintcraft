@@ -1,10 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { temporal } from "zundo";
-import type { QuantMethod } from "@/core/quantize";
+import type { QuantMethod, QuantizeOptions } from "@/core/quantize";
 import type { CanvasType, ImageFitMode, PaintFormat } from "@/types";
 import type { RGB } from "@/core/palette";
-import type { ResizeFilter } from "@/core/preprocess";
+import type { ResizeFilter, ResizeOptions } from "@/core/preprocess";
 import { DEFAULT_PADDING_COLOR } from "@/core/preprocess";
 import { CANVAS_TYPES, findClosestCanvas } from "@/types";
 
@@ -110,9 +110,20 @@ interface StoreActions {
   reset: () => void;
 }
 
-const VALID_QUANT_METHODS = new Set<string>(["median-cut", "neuquant", "wuquant"]);
-const VALID_FIT_MODES = new Set<string>(["contain", "fill", "width", "height"]);
-const VALID_RESIZE_FILTERS = new Set<string>([
+export interface ProcessImageOptions {
+  canvas: CanvasType;
+  method: QuantMethod;
+  fitMode: ImageFitMode;
+  padding: RGB;
+  quantEnabled: boolean;
+  quantOptions: QuantizeOptions;
+  resizeOptions: ResizeOptions;
+  paddingAlpha: number;
+}
+
+const VALID_QUANT_METHODS = new Set<QuantMethod>(["median-cut", "neuquant", "wuquant"]);
+const VALID_FIT_MODES = new Set<ImageFitMode>(["contain", "width", "height"]);
+const VALID_RESIZE_FILTERS = new Set<ResizeFilter>([
   "nearest",
   "box",
   "hamming",
@@ -120,7 +131,7 @@ const VALID_RESIZE_FILTERS = new Set<string>([
   "lanczos3",
   "mks2013",
 ]);
-const VALID_PAINT_FORMATS = new Set<string>(["jop-1x", "jop-delta", "jop-2x"]);
+const VALID_PAINT_FORMATS = new Set<PaintFormat>(["jop-1x", "jop-delta", "jop-2x"]);
 
 export const useAppStore = create<AppState & StoreActions>()(
   persist(
@@ -275,15 +286,15 @@ export const useAppStore = create<AppState & StoreActions>()(
   ),
 );
 
-export function getProcessImageArgs(s: AppState) {
-  return [
-    s.selectedCanvas,
-    s.quantMethod,
-    s.fitMode,
-    s.paddingColor,
-    s.quantizationEnabled,
-    { colors: s.adaptiveColorCount, includeFixedPalette: s.includeFixedPalette },
-    { filter: s.resizeFilter, unsharpAmount: s.unsharpAmount },
-    s.glass ? s.paddingAlpha : 1,
-  ] as const;
+export function getProcessImageOptions(s: AppState): ProcessImageOptions {
+  return {
+    canvas: s.selectedCanvas,
+    method: s.quantMethod,
+    fitMode: s.fitMode,
+    padding: s.paddingColor,
+    quantEnabled: s.quantizationEnabled,
+    quantOptions: { colors: s.adaptiveColorCount, includeFixedPalette: s.includeFixedPalette },
+    resizeOptions: { filter: s.resizeFilter, unsharpAmount: s.unsharpAmount },
+    paddingAlpha: s.glass ? s.paddingAlpha : 1,
+  };
 }

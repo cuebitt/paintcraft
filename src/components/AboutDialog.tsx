@@ -26,7 +26,7 @@ export function AboutDialog() {
         <InfoIcon className="size-4" />
         <span className="sr-only">About paintcraft</span>
       </DialogTrigger>
-      <DialogContent className="max-h-[85dvh] min-h-0 grid-rows-[auto_1fr] sm:max-h-[75dvh]">
+      <DialogContent className="max-h-[85dvh] min-h-0 grid-rows-[auto_1fr] sm:max-h-[75dvh] sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>paintcraft</DialogTitle>
           <DialogDescription>

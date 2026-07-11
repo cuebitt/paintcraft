@@ -35,6 +35,15 @@ const MAX_CT_FOR_FORMAT: Record<PaintFormat, number> = {
   "jop-2x": 3,
 };
 
+const rgbToArgb = ([r, g, b]: [number, number, number]): number =>
+  (0xff << 24) | (r << 16) | (g << 8) | b;
+
+const argbToRgb = (argb: number): [number, number, number] => [
+  (argb >> 16) & 0xff,
+  (argb >> 8) & 0xff,
+  argb & 0xff,
+];
+
 export interface PaintingData {
   canvasType: number;
   pixels: [number, number, number][];
@@ -101,7 +110,7 @@ export async function writePaintFile(
     );
   }
 
-  const argbPixels = data.pixels.map(([r, g, b]) => (0xff << 24) | (r << 16) | (g << 8) | b);
+  const argbPixels = data.pixels.map(rgbToArgb);
 
   const fields: CompoundTag = {
     ct: new Int8(data.canvasType),
@@ -128,9 +137,7 @@ export async function writePaintFile(
 
     const sidesActive = data.sidesActive ?? false;
     if (sidesActive && data.sidePixels) {
-      fields.sidePixels = new Int32Array(
-        data.sidePixels.map(([r, g, b]) => (0xff << 24) | (r << 16) | (g << 8) | b),
-      );
+      fields.sidePixels = new Int32Array(data.sidePixels.map(rgbToArgb));
       fields.sidesActive = new Int8(1);
     } else {
       fields.sidesActive = new Int8(0);
@@ -164,11 +171,7 @@ export async function readPaintFile(data: ArrayBuffer | Uint8Array): Promise<Pai
 
   const img = root.img as Int8Array | Uint8Array | undefined;
 
-  const rgbPixels: [number, number, number][] = Array.from(pixels, (argb: number) => [
-    (argb >> 16) & 0xff,
-    (argb >> 8) & 0xff,
-    argb & 0xff,
-  ]);
+  const rgbPixels = Array.from(pixels, argbToRgb);
 
   const storedFormat = root.fmt as PaintFormat | undefined;
   let detectedFormat: PaintFormat;
@@ -198,11 +201,7 @@ export async function readPaintFile(data: ArrayBuffer | Uint8Array): Promise<Pai
 
     if (sidesActive && "sidePixels" in root) {
       const sidePixelsRaw = root.sidePixels as unknown as Int32Array;
-      sidePixels = Array.from(sidePixelsRaw, (argb: number) => [
-        (argb >> 16) & 0xff,
-        (argb >> 8) & 0xff,
-        argb & 0xff,
-      ]);
+      sidePixels = Array.from(sidePixelsRaw, argbToRgb);
     }
   }
 

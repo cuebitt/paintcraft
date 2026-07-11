@@ -1,4 +1,4 @@
-import { imageDataToBlob } from "../lib/utils";
+import { canvasToBlob, imageDataToBlob } from "../lib/utils";
 import type { ErrorResponse } from "../core/image-utils";
 
 interface ParseAsepriteRequest {
@@ -97,45 +97,29 @@ async function parsePsd(buffer: ArrayBuffer): Promise<ParseResponse> {
 async function canvasToPngBytes(
   canvas: HTMLCanvasElement | OffscreenCanvas,
 ): Promise<Uint8ClampedArray> {
-  if (typeof OffscreenCanvas !== "undefined" && canvas instanceof OffscreenCanvas) {
-    const pngBlob = await canvas.convertToBlob({ type: "image/png" });
-    const arrayBuffer = await pngBlob.arrayBuffer();
-    return new Uint8ClampedArray(arrayBuffer);
-  }
+  const blob = await canvasToBlob(canvas);
+  return new Uint8ClampedArray(await blob.arrayBuffer());
+}
 
-  const htmlCanvas = canvas as HTMLCanvasElement;
-  const pngBlob = await new Promise<Blob>((resolve, reject) => {
-    htmlCanvas.toBlob((blob) => {
-      if (blob) resolve(blob);
-      else reject(new Error("Failed to create PNG blob"));
-    }, "image/png");
-  });
-  const arrayBuffer = await pngBlob.arrayBuffer();
-  return new Uint8ClampedArray(arrayBuffer);
+async function wrapCanvasResult(
+  canvas: HTMLCanvasElement | OffscreenCanvas,
+): Promise<ParseResponse> {
+  return {
+    type: "result",
+    width: canvas.width,
+    height: canvas.height,
+    imageData: await canvasToPngBytes(canvas),
+  };
 }
 
 async function parsePiskel(text: string): Promise<ParseResponse> {
   const { parsePiskel } = await import("./piskel");
-  const canvas = await parsePiskel(text);
-
-  return {
-    type: "result",
-    width: canvas.width,
-    height: canvas.height,
-    imageData: await canvasToPngBytes(canvas),
-  };
+  return wrapCanvasResult(await parsePiskel(text));
 }
 
 async function parsePixil(text: string): Promise<ParseResponse> {
   const { parsePixil } = await import("./pixil");
-  const canvas = await parsePixil(text);
-
-  return {
-    type: "result",
-    width: canvas.width,
-    height: canvas.height,
-    imageData: await canvasToPngBytes(canvas),
-  };
+  return wrapCanvasResult(await parsePixil(text));
 }
 
 self.onmessage = async (e: MessageEvent<ParseRequest>) => {

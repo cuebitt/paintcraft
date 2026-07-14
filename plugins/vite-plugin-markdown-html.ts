@@ -17,10 +17,10 @@ function highlightHtml(html: string): string {
     (_, lang, code) => {
       const hljsLang = LANG_MAP[lang] ?? lang;
       const decoded = code
-        .replace(/&amp;/g, "&")
         .replace(/&lt;/g, "<")
         .replace(/&gt;/g, ">")
-        .replace(/&quot;/g, '"');
+        .replace(/&quot;/g, '"')
+        .replace(/&amp;/g, "&");
       try {
         const highlighted = hljs.highlight(decoded, { language: hljsLang }).value;
         return `<pre><code class="language-${lang}">${highlighted}</code></pre>`;

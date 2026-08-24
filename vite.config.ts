@@ -1,4 +1,5 @@
 import { defineConfig, lazyPlugins } from "vite-plus";
+import type { PluginOption } from "vite-plus";
 import preact from "@preact/preset-vite";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
@@ -39,12 +40,9 @@ export default defineConfig({
     },
     ignorePatterns: ["dist"],
   },
-  // @ts-expect-error -- lazyPlugins return type incompatibility with Vite PluginOption
-  plugins: lazyPlugins(() => [
-    preact({ exclude: [/\.worker\.ts$/] }),
-    tailwindcss(),
-    markdownHtml(),
-  ]),
+  plugins: lazyPlugins(
+    () => [preact({ exclude: [/\.worker\.ts$/] }), tailwindcss(), markdownHtml()] as PluginOption[],
+  ),
   build: {
     rollupOptions: {
       output: {

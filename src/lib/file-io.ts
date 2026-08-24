@@ -2,7 +2,7 @@ import { saveAs } from "file-saver";
 import { generateSlug } from "random-word-slugs";
 import type { ImageProcessorWorkers } from "@/hooks/useImageProcessor";
 import { useAppStore } from "@/app/store";
-import { createCanvas } from "@/formats/canvas";
+import { createCanvas, getContext2D } from "@/formats/canvas";
 import type { CanvasType } from "@/types";
 import {
   writePaintFile,
@@ -184,8 +184,7 @@ export async function exportPng(workers: ImageProcessorWorkers): Promise<void> {
 
   const { quantized } = workers.quantizedDataRef.current;
   const canvas = createCanvas(quantized.width, quantized.height);
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
+  const ctx = getContext2D(canvas);
   ctx.putImageData(quantized, 0, 0);
 
   let blob: Blob;

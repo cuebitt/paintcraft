@@ -10,7 +10,6 @@ import { useDisclosure } from "@mantine/hooks";
 import { useImageProcessor, type ProcessImageFn } from "@/hooks/useImageProcessor";
 import { useAppCallbacks } from "@/hooks/useAppCallbacks";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
 import { useClipboard } from "@/hooks/useClipboard";
 import { resolveImageParam } from "@/hooks/useEmbedMode";
 import { preprocessImageForCanvas } from "@/core/preprocess";
@@ -78,72 +77,65 @@ function App() {
 
   const isEmbedded = detectEmbedMode();
 
-  const { startTimer, endTimer } = usePerformanceMonitor();
-
-  const processImage = useCallback<ProcessImageFn>(
-    async (img, options) => {
-      try {
-        const {
-          canvas,
-          fitMode: mode,
-          method,
-          padding,
-          quantEnabled,
-          quantOptions,
-          resizeOptions,
-          paddingAlpha,
-        } = options;
-        const workers = workersRef.current;
-        if (!workers?.workerRef.current) {
-          dispatchError(new Error("Image processor not ready"), "Image processor not ready");
-          return;
-        }
-
-        workers.pendingProcessRef.current = {
-          displayDataUrl: "",
-          method: options.method,
-          quantEnabled,
-          quantOptions,
-        };
-
-        const preprocessedData = await preprocessImageForCanvas(
-          img,
-          canvas,
-          mode,
-          padding,
-          resizeOptions,
-          paddingAlpha,
-        );
-        workers.preprocessedDataRef.current = preprocessedData;
-
-        const displayBitmap = await createImageBitmap(img);
-        postDisplayMessage(
-          workers.workerRef.current,
-          displayBitmap,
-          canvas,
-          mode,
-          padding,
-          paddingAlpha,
-        );
-
-        if (quantEnabled) {
-          postQuantizeMessage(workers.workerRef.current, preprocessedData, method, quantOptions);
-        } else {
-          workers.quantizedDataRef.current = { quantized: preprocessedData, adaptivePalette: [] };
-          workers.pendingResultRef.current = {
-            type: "preprocessed",
-            processedData: preprocessedData,
-          };
-          workers.flushPendingResult();
-        }
-      } catch (err) {
-        dispatchError(err, "processing failed");
-      } finally {
-        endTimer("process-image");
+  const processImage = useCallback<ProcessImageFn>(async (img, options) => {
+    try {
+      const {
+        canvas,
+        fitMode: mode,
+        method,
+        padding,
+        quantEnabled,
+        quantOptions,
+        resizeOptions,
+        paddingAlpha,
+      } = options;
+      const workers = workersRef.current;
+      if (!workers?.workerRef.current) {
+        dispatchError(new Error("Image processor not ready"), "Image processor not ready");
+        return;
       }
-    },
-    [endTimer],
-  );
+
+      workers.pendingProcessRef.current = {
+        displayDataUrl: "",
+        method: options.method,
+        quantEnabled,
+        quantOptions,
+      };
+
+      const preprocessedData = await preprocessImageForCanvas(
+        img,
+        canvas,
+        mode,
+        padding,
+        resizeOptions,
+        paddingAlpha,
+      );
+      workers.preprocessedDataRef.current = preprocessedData;
+
+      const displayBitmap = await createImageBitmap(img);
+      postDisplayMessage(
+        workers.workerRef.current,
+        displayBitmap,
+        canvas,
+        mode,
+        padding,
+        paddingAlpha,
+      );
+
+      if (quantEnabled) {
+        postQuantizeMessage(workers.workerRef.current, preprocessedData, method, quantOptions);
+      } else {
+        workers.quantizedDataRef.current = { quantized: preprocessedData, adaptivePalette: [] };
+        workers.pendingResultRef.current = {
+          type: "preprocessed",
+          processedData: preprocessedData,
+        };
+        workers.flushPendingResult();
+      }
+    } catch (err) {
+      dispatchError(err, "processing failed");
+    }
+  }, []);
 
   const workers = useImageProcessor(processImage);
   const workersRef = useRef(workers);
@@ -154,7 +146,7 @@ function App() {
     workers,
   );
 
-  const handleCopyToClipboard = useClipboard(workers, startTimer, endTimer);
+  const handleCopyToClipboard = useClipboard(workers);
 
   useKeyboardShortcuts({
     "cmd+z": undo,
@@ -196,7 +188,6 @@ function App() {
       if (workers.originalImageRef.current && useAppStore.getState().originalUrl) {
         useAppStore.getState().setLoading(true);
         const s = useAppStore.getState();
-        startTimer("process-image");
         void processImage(workers.originalImageRef.current, getProcessImageOptions(s));
       }
     }, 50);
@@ -219,7 +210,6 @@ function App() {
     state.reprocessCount,
     processImage,
     workers.originalImageRef,
-    startTimer,
   ]);
 
   const hasResults = !!(state.originalUrl && state.preprocessedUrl && state.quantizedUrl);

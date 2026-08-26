@@ -11,6 +11,7 @@ import { ResizeSettings } from "@/components/ResizeSettings";
 import { QuantizationSettings } from "@/components/QuantizationSettings";
 import { ExportSettings } from "@/components/ExportSettings";
 import { Undo2Icon, Redo2Icon } from "lucide-react";
+import type { TilePlacement } from "@/core/tiling";
 
 function useStoreSnapshot() {
   const [, forceUpdate] = useState(0);
@@ -24,7 +25,7 @@ function useTemporalSnapshot() {
   return useAppStore.temporal.getState();
 }
 
-export function SettingsPanel() {
+export function SettingsPanel({ tiles }: { tiles?: TilePlacement[] }) {
   const {
     selectedCanvas,
     paddingColorPreview,
@@ -45,7 +46,11 @@ export function SettingsPanel() {
     glass,
     sidesActive,
     showTransparencyGrid,
+    showTileBorders,
     loading,
+    multiCanvas,
+    multiWidth,
+    multiHeight,
     setCanvas,
     setPaddingColorPreview,
     setPaddingColor,
@@ -65,6 +70,9 @@ export function SettingsPanel() {
     setGlass,
     setSidesActive,
     setShowTransparencyGrid,
+    setShowTileBorders,
+    setMultiCanvas,
+    setMultiSize,
     reprocess,
   } = useStoreSnapshot();
 
@@ -112,12 +120,20 @@ export function SettingsPanel() {
           glass={glass}
           showGrid={showGrid}
           showTransparencyGrid={showTransparencyGrid}
+          showTileBorders={showTileBorders}
           loading={loading}
+          multiCanvas={multiCanvas}
+          multiWidth={multiWidth}
+          multiHeight={multiHeight}
+          tiles={tiles}
           setCanvas={setCanvas}
           setPaddingColorPreview={setPaddingColorPreview}
           setPaddingColor={setPaddingColor}
           setShowGrid={setShowGrid}
           setShowTransparencyGrid={setShowTransparencyGrid}
+          setShowTileBorders={setShowTileBorders}
+          setMultiCanvas={setMultiCanvas}
+          setMultiSize={setMultiSize}
         />
       </TabsContent>
 

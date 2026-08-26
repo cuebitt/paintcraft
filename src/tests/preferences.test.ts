@@ -24,6 +24,9 @@ describe("preferences persist", () => {
       fitMode: "width",
       resizeFilter: "lanczos3",
       paintFormat: "jop-delta",
+      multiCanvas: false,
+      multiWidth: 2,
+      multiHeight: 2,
     });
   });
 

@@ -13,20 +13,13 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useClipboard } from "@/hooks/useClipboard";
 import { resolveImageParam } from "@/hooks/useEmbedMode";
 import { preprocessImageForCanvas } from "@/core/preprocess";
+import { computeTiles } from "@/core/tiling";
 import { detectEmbedMode } from "@/lib/embed";
 import { useAppStore, getProcessImageOptions } from "@/app/store";
 import { dispatchError } from "@/lib/helpers";
 import type { CanvasType, ImageFitMode } from "@/types";
 import type { RGB } from "@/core/palette";
 import type { QuantMethod, QuantizeOptions } from "@/core/quantize";
-
-const toggleGrid = () => {
-  useAppStore.getState().setShowGrid(!useAppStore.getState().showGrid);
-};
-
-const toggleQuantize = () => {
-  useAppStore.getState().setQuantizationEnabled(!useAppStore.getState().quantizationEnabled);
-};
 
 const handleReset = () => useAppStore.getState().reset();
 
@@ -154,8 +147,10 @@ function App() {
     "cmd+shift+z": redo,
     "ctrl+shift+z": redo,
     "ctrl+y": redo,
-    g: toggleGrid,
-    q: toggleQuantize,
+    g: () => useAppStore.getState().setShowGrid(!useAppStore.getState().showGrid),
+    b: () => useAppStore.getState().setShowTileBorders(!useAppStore.getState().showTileBorders),
+    q: () =>
+      useAppStore.getState().setQuantizationEnabled(!useAppStore.getState().quantizationEnabled),
     "cmd+shift+e": handleExportPaintFile,
     "ctrl+shift+e": handleExportPaintFile,
     "cmd+shift+p": handleExportPng,
@@ -216,22 +211,31 @@ function App() {
 
   const activeUrl = showOriginal ? state.originalUrl : state.quantizedUrl;
 
+  const tiles = useMemo(() => {
+    if (!state.multiCanvas) return undefined;
+    return computeTiles(state.multiWidth, state.multiHeight, state.paintFormat);
+  }, [state.multiCanvas, state.multiWidth, state.multiHeight, state.paintFormat]);
+
   const preview = useMemo(
     () => ({
       showOriginal,
       showTransparencyGrid: state.showTransparencyGrid,
       showGrid: state.showGrid,
+      showTileBorders: state.showTileBorders,
       activeUrl,
       cellsX: state.selectedCanvas.cellsX,
       cellsY: state.selectedCanvas.cellsY,
+      tiles,
     }),
     [
       showOriginal,
       state.showTransparencyGrid,
       state.showGrid,
+      state.showTileBorders,
       activeUrl,
       state.selectedCanvas.cellsX,
       state.selectedCanvas.cellsY,
+      tiles,
     ],
   );
 

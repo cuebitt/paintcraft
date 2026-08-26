@@ -1,5 +1,6 @@
 import { saveAs } from "file-saver";
 import { generateSlug } from "random-word-slugs";
+import { zipSync } from "fflate";
 import type { ImageProcessorWorkers } from "@/hooks/useImageProcessor";
 import { useAppStore } from "@/app/store";
 import { createCanvas, getContext2D } from "@/formats/canvas";
@@ -14,6 +15,7 @@ import {
 import type { PaintingData } from "@/formats/paint-nbt";
 import { canvasToBlob, imageDataToBlob } from "@/lib/utils";
 import { dispatchError } from "@/lib/helpers";
+import { computeTiles } from "@/core/tiling";
 
 export function sanitizeForFilename(s: string): string {
   return s
@@ -132,11 +134,27 @@ export function extractSidePixels(
   ];
 }
 
-export function generatePaintFilename(state: ReturnType<typeof useAppStore.getState>): string {
+export function getPaintBaseName(state: ReturnType<typeof useAppStore.getState>): string {
   if (state.author && state.title) {
-    return `${sanitizeForFilename(state.author)}_${sanitizeForFilename(state.title)}.paint`;
+    return `${sanitizeForFilename(state.author)}_${sanitizeForFilename(state.title)}`;
   }
-  return `${generateSlug(4)}.paint`;
+  return generateSlug(4);
+}
+
+export function sliceImageData(
+  src: ImageData,
+  sx: number,
+  sy: number,
+  w: number,
+  h: number,
+): ImageData {
+  const out = new Uint8ClampedArray(w * h * 4);
+  for (let y = 0; y < h; y++) {
+    const srcOff = ((sy + y) * src.width + sx) * 4;
+    const dstOff = y * w * 4;
+    out.set(src.data.subarray(srcOff, srcOff + w * 4), dstOff);
+  }
+  return new ImageData(out, w, h);
 }
 
 export async function exportPaintFile(
@@ -144,6 +162,71 @@ export async function exportPaintFile(
   state: ReturnType<typeof useAppStore.getState>,
 ): Promise<void> {
   if (!workers.quantizedDataRef.current) return;
+
+  const hasAuthorAndTitle = state.author !== "" && state.title !== "";
+  const baseName = getPaintBaseName(state);
+  const commonFields = {
+    author: hasAuthorAndTitle ? state.author : "",
+    title: hasAuthorAndTitle ? state.title : "",
+    generation: state.signed ? 1 : 0,
+    version: state.signed ? 2 : 99,
+    glass: state.paintFormat === "jop-2x" ? state.glass : undefined,
+    sidesActive: state.paintFormat === "jop-2x" ? state.sidesActive : undefined,
+  } as const;
+
+  if (state.multiCanvas) {
+    const { quantized } = workers.quantizedDataRef.current;
+    const tiles = computeTiles(state.multiWidth, state.multiHeight, state.paintFormat);
+    const n = tiles.length;
+    const zipEntries: Record<string, Uint8Array> = {};
+    for (let i = 0; i < n; i++) {
+      const tile = tiles[i]!;
+      const sx = tile.x * 16;
+      const sy = tile.y * 16;
+      const tw = tile.canvasType.width;
+      const th = tile.canvasType.height;
+      const sliced = sliceImageData(quantized, sx, sy, tw, th);
+      const pixels = quantizedToPixels(sliced);
+      const sidePixels =
+        state.paintFormat === "jop-2x" && state.sidesActive
+          ? extractSidePixels(sliced, tw, th)
+          : undefined;
+      const slicedOriginal = workers.preprocessedDataRef.current
+        ? sliceImageData(workers.preprocessedDataRef.current, sx, sy, tw, th)
+        : null;
+      const originalImage = await encodeOriginalImage(slicedOriginal);
+      const paintBuffer = await writePaintFile(
+        {
+          canvasType: getCanvasTypeIndex(tile.canvasType),
+          pixels,
+          name: `${baseName}_${i + 1}of${n}`,
+          ...commonFields,
+          originalImage,
+          sidePixels,
+        },
+        state.paintFormat,
+      );
+      zipEntries[`${baseName}_${i + 1}of${n}.paint`] = paintBuffer;
+    }
+    const layoutLines = [
+      `Paintcraft multi-canvas layout`,
+      `Base: ${baseName}`,
+      `Size: ${state.multiWidth}×${state.multiHeight} blocks (${state.multiWidth * 16}×${state.multiHeight * 16}px)`,
+      `Format: ${state.paintFormat}`,
+      `Paintings: ${n}`,
+      `Order: row-major, top-left = 1`,
+      ``,
+      ...tiles.map(
+        (t, idx) =>
+          `${idx + 1}of${n}: ${t.canvasType.name} ${t.canvasType.cellsX}×${t.canvasType.cellsY} at block (${t.x},${t.y}) → pixels (${t.x * 16},${t.y * 16}) ${t.canvasType.width}×${t.canvasType.height} → ${baseName}_${idx + 1}of${n}.paint`,
+      ),
+    ];
+    zipEntries[`${baseName}_layout.txt`] = new TextEncoder().encode(layoutLines.join("\n"));
+    const zipped = zipSync(zipEntries);
+    const blob = new Blob([zipped as BlobPart], { type: "application/zip" });
+    saveAs(blob, `${baseName}.zip`);
+    return;
+  }
 
   const { quantized } = workers.quantizedDataRef.current;
   const pixels = quantizedToPixels(quantized);
@@ -156,27 +239,21 @@ export async function exportPaintFile(
 
   const name = `${generateSlug(4)}_${Date.now().toString(36)}`;
   const canvasTypeIndex = getCanvasTypeIndex(state.selectedCanvas);
-  const hasAuthorAndTitle = state.author !== "" && state.title !== "";
 
   const paintBuffer = await writePaintFile(
     {
       canvasType: canvasTypeIndex,
       pixels,
       name,
-      author: hasAuthorAndTitle ? state.author : "",
-      title: hasAuthorAndTitle ? state.title : "",
-      generation: state.signed ? 1 : 0,
-      version: state.signed ? 2 : 99,
+      ...commonFields,
       originalImage,
-      glass: state.paintFormat === "jop-2x" ? state.glass : undefined,
-      sidesActive: state.paintFormat === "jop-2x" ? state.sidesActive : undefined,
       sidePixels,
     },
     state.paintFormat,
   );
 
   const blob = new Blob([paintBuffer as BlobPart], { type: "application/octet-stream" });
-  saveAs(blob, generatePaintFilename(state));
+  saveAs(blob, `${getPaintBaseName(state)}.paint`);
 }
 
 export async function exportPng(workers: ImageProcessorWorkers): Promise<void> {

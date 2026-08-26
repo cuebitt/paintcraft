@@ -29,8 +29,17 @@ function ExportButtons({
   loading,
   variant = "secondary",
   labels = "full",
-}: ExportButtonsProps) {
-  const paintLabel = labels === "short" ? ".paint" : "Export .paint";
+  tiles,
+}: ExportButtonsProps & { tiles?: TilePlacement[] }) {
+  const count = tiles?.length ?? 0;
+  const multi = count > 1;
+  const paintLabel = multi
+    ? labels === "short"
+      ? `.zip (${count})`
+      : `Export ${count} Paintings (.zip)`
+    : labels === "short"
+      ? ".paint"
+      : "Export .paint";
   const pngLabel = labels === "short" ? "PNG" : "Export PNG";
 
   return (
@@ -69,13 +78,17 @@ function ExportButtons({
   );
 }
 
+import type { TilePlacement } from "@/core/tiling";
+
 export type PreviewOptions = {
   showOriginal: boolean;
   showTransparencyGrid: boolean;
   showGrid: boolean;
+  showTileBorders: boolean;
   activeUrl: string | null;
   cellsX: number;
   cellsY: number;
+  tiles?: TilePlacement[];
 };
 
 type ResultCardsProps = {
@@ -97,12 +110,22 @@ export function ResultCards({
   preview,
   className,
 }: ResultCardsProps) {
-  const { showOriginal, showTransparencyGrid, showGrid, activeUrl, cellsX, cellsY } = preview;
+  const {
+    showOriginal,
+    showTransparencyGrid,
+    showGrid,
+    showTileBorders,
+    activeUrl,
+    cellsX,
+    cellsY,
+    tiles,
+  } = preview;
   const [mobileSettingsOpen, { toggle: toggleMobileSettings }] = useDisclosure(false);
   const previewRef = useRef<HTMLDivElement>(null);
   const resizeObserver = useResizeObserver<HTMLDivElement>();
   const containerRef = resizeObserver[0] as import("preact").RefObject<HTMLDivElement>;
   const rect = resizeObserver[1];
+  const exportProps = { handleExportPng, handleExportPaintFile, handleReset, loading, tiles };
 
   useEffect(() => {
     const el = previewRef.current;
@@ -129,17 +152,10 @@ export function ResultCards({
         )}
       >
         <CardHeader className="flex flex-row flex-wrap items-center gap-1">
-          <ExportButtons
-            handleExportPng={handleExportPng}
-            handleExportPaintFile={handleExportPaintFile}
-            handleReset={handleReset}
-            loading={loading}
-            variant="secondary"
-            labels="full"
-          />
+          <ExportButtons {...exportProps} variant="secondary" labels="full" />
         </CardHeader>
         <CardContent className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          <SettingsPanel />
+          <SettingsPanel tiles={tiles} />
         </CardContent>
       </Card>
 
@@ -176,6 +192,26 @@ export function ResultCards({
                     }
                   />
                 )}
+                {tiles &&
+                  tiles.length > 1 &&
+                  showTileBorders &&
+                  tiles.map((t) => (
+                    <div
+                      key={`${t.x}-${t.y}`}
+                      className="tile-border pointer-events-none absolute border-2"
+                      title={`${t.canvasType.name} at block ${t.x},${t.y}`}
+                      style={{
+                        left: `${(t.x / cellsX) * 100}%`,
+                        top: `${(t.y / cellsY) * 100}%`,
+                        width: `${(t.canvasType.cellsX / cellsX) * 100}%`,
+                        height: `${(t.canvasType.cellsY / cellsY) * 100}%`,
+                      }}
+                    >
+                      <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded bg-background/80 px-1 py-0.5 text-[10px] leading-none font-medium text-foreground shadow-sm">
+                        {t.canvasType.cellsX}×{t.canvasType.cellsY}
+                      </span>
+                    </div>
+                  ))}
               </div>
             )}
           </div>
@@ -183,14 +219,7 @@ export function ResultCards({
       </Card>
 
       <div className="flex items-center gap-1 md:hidden">
-        <ExportButtons
-          handleExportPng={handleExportPng}
-          handleExportPaintFile={handleExportPaintFile}
-          handleReset={handleReset}
-          loading={loading}
-          variant="outline"
-          labels="short"
-        />
+        <ExportButtons {...exportProps} variant="outline" labels="short" />
         <div className="ml-auto">
           <Button
             variant={mobileSettingsOpen ? "secondary" : "outline"}

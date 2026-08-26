@@ -7,6 +7,7 @@ import type { RGB } from "@/core/palette";
 import type { ResizeFilter, ResizeOptions } from "@/core/preprocess";
 import { DEFAULT_PADDING_COLOR } from "@/core/preprocess";
 import { CANVAS_TYPES, findClosestCanvas } from "@/types";
+import { multiCanvasType } from "@/core/tiling";
 
 export interface AppState {
   originalUrl: string | null;
@@ -37,6 +38,10 @@ export interface AppState {
   showTransparencyGrid: boolean;
   glassPadding: boolean;
   reprocessCount: number;
+  multiCanvas: boolean;
+  multiWidth: number;
+  multiHeight: number;
+  showTileBorders: boolean;
 }
 
 const initialState: AppState = {
@@ -68,6 +73,10 @@ const initialState: AppState = {
   showTransparencyGrid: true,
   glassPadding: false,
   reprocessCount: 0,
+  multiCanvas: false,
+  multiWidth: 2,
+  multiHeight: 2,
+  showTileBorders: true,
 };
 
 interface StoreActions {
@@ -106,6 +115,9 @@ interface StoreActions {
   setPaintFormat: (format: PaintFormat) => void;
   setGlass: (glass: boolean) => void;
   setSidesActive: (active: boolean) => void;
+  setMultiCanvas: (enabled: boolean) => void;
+  setMultiSize: (w: number, h: number) => void;
+  setShowTileBorders: (show: boolean) => void;
   reprocess: () => void;
   reset: () => void;
 }
@@ -132,6 +144,8 @@ const VALID_RESIZE_FILTERS = new Set<ResizeFilter>([
   "mks2013",
 ]);
 const VALID_PAINT_FORMATS = new Set<PaintFormat>(["jop-1x", "jop-delta", "jop-2x"]);
+
+const clamp16 = (n: number) => (Number.isFinite(n) ? Math.min(16, Math.max(1, Math.round(n))) : 1);
 
 export const useAppStore = create<AppState & StoreActions>()(
   persist(
@@ -172,6 +186,7 @@ export const useAppStore = create<AppState & StoreActions>()(
             glass,
             sidesActive,
             glassPadding,
+            multiCanvas: false,
           });
         },
         setLoading: (loading) => set({ loading }),
@@ -206,7 +221,9 @@ export const useAppStore = create<AppState & StoreActions>()(
           const state = get();
           set({
             paintFormat: format,
-            selectedCanvas: findClosestCanvas(state.selectedCanvas, format),
+            selectedCanvas: state.multiCanvas
+              ? state.selectedCanvas
+              : findClosestCanvas(state.selectedCanvas, format),
             glassPadding: state.glass && format === "jop-2x",
           });
         },
@@ -219,6 +236,31 @@ export const useAppStore = create<AppState & StoreActions>()(
           });
         },
         setSidesActive: (active) => set({ sidesActive: active }),
+        setMultiCanvas: (enabled) => {
+          const s = get();
+          if (enabled) {
+            set({
+              multiCanvas: true,
+              selectedCanvas: multiCanvasType(s.multiWidth, s.multiHeight),
+            });
+          } else {
+            set({
+              multiCanvas: false,
+              selectedCanvas: findClosestCanvas(s.selectedCanvas, s.paintFormat),
+            });
+          }
+        },
+        setMultiSize: (w, h) => {
+          const cw = clamp16(w);
+          const ch = clamp16(h);
+          const s = get();
+          if (s.multiCanvas) {
+            set({ multiWidth: cw, multiHeight: ch, selectedCanvas: multiCanvasType(cw, ch) });
+          } else {
+            set({ multiWidth: cw, multiHeight: ch });
+          }
+        },
+        setShowTileBorders: (show) => set({ showTileBorders: show }),
         reprocess: () => set((s) => ({ reprocessCount: s.reprocessCount + 1 })),
         reset: () => set(initialState),
       }),
@@ -236,6 +278,7 @@ export const useAppStore = create<AppState & StoreActions>()(
             showTransparencyGrid: _transparency,
             paddingColorPreview: _preview,
             reprocessCount: _reprocessCount,
+            showTileBorders: _tileBorders,
             ...tracked
           } = state;
           return tracked;
@@ -260,9 +303,23 @@ export const useAppStore = create<AppState & StoreActions>()(
         fitMode: state.fitMode,
         resizeFilter: state.resizeFilter,
         paintFormat: state.paintFormat,
+        multiCanvas: state.multiCanvas,
+        multiWidth: state.multiWidth,
+        multiHeight: state.multiHeight,
       }),
       merge: (persisted, current) => {
         const p = persisted as Record<string, unknown>;
+        let multiCanvas = current.multiCanvas;
+        let multiWidth = current.multiWidth;
+        let multiHeight = current.multiHeight;
+        if (typeof p.multiCanvas === "boolean") multiCanvas = p.multiCanvas;
+        if (typeof p.multiWidth === "number" && Number.isFinite(p.multiWidth))
+          multiWidth = clamp16(p.multiWidth);
+        if (typeof p.multiHeight === "number" && Number.isFinite(p.multiHeight))
+          multiHeight = clamp16(p.multiHeight);
+        const selectedCanvas = multiCanvas
+          ? multiCanvasType(multiWidth, multiHeight)
+          : current.selectedCanvas;
         return {
           ...current,
           ...(typeof p.quantMethod === "string" &&
@@ -280,6 +337,10 @@ export const useAppStore = create<AppState & StoreActions>()(
           VALID_PAINT_FORMATS.has(p.paintFormat as PaintFormat)
             ? { paintFormat: p.paintFormat as PaintFormat }
             : {}),
+          multiCanvas,
+          multiWidth,
+          multiHeight,
+          selectedCanvas,
         };
       },
     },

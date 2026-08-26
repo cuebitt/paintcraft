@@ -4,7 +4,7 @@ import {
   quantizedToPixels,
   extractSidePixels,
   paintingDataToImageData,
-  generatePaintFilename,
+  getPaintBaseName,
 } from "@/lib/file-io";
 import type { PaintingData } from "@/formats/paint-nbt";
 import type { CanvasType } from "@/types";
@@ -205,26 +205,26 @@ describe("paintingDataToImageData", () => {
   });
 });
 
-describe("generatePaintFilename", () => {
+describe("getPaintBaseName", () => {
   it("uses author and title when both are present", () => {
     const state = { author: "test_author", title: "test_title" } as any;
-    expect(generatePaintFilename(state)).toBe("test_author_test_title.paint");
+    expect(getPaintBaseName(state)).toBe("test_author_test_title");
   });
 
   it("sanitizes author and title", () => {
     const state = { author: "hello world!", title: "my painting #1" } as any;
-    expect(generatePaintFilename(state)).toBe("hello_world_my_painting_1.paint");
+    expect(getPaintBaseName(state)).toBe("hello_world_my_painting_1");
   });
 
   it("falls back to random slug when author or title is missing", () => {
     const state = { author: "", title: "title" } as any;
-    const result = generatePaintFilename(state);
-    expect(result).toMatch(/^[a-z-]+\.paint$/);
+    const result = getPaintBaseName(state);
+    expect(result).toMatch(/^[a-z-]+$/);
   });
 
   it("falls back to random slug when both are missing", () => {
     const state = { author: "", title: "" } as any;
-    const result = generatePaintFilename(state);
-    expect(result).toMatch(/^[a-z-]+\.paint$/);
+    const result = getPaintBaseName(state);
+    expect(result).toMatch(/^[a-z-]+$/);
   });
 });
